@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UR5 ロボットアーム制御チュートリアル</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ===== Design Tokens ===== */
+    :root {
+      /* Color System - Technical / Education / Robotics */
+      --color-primary: #2563eb;
+      --color-primary-light: #3b82f6;
+      --color-primary-dark: #1d4ed8;
+      --color-primary-50: #eff6ff;
+      --color-primary-100: #dbeafe;
+      --color-primary-200: #bfdbfe;
+
+      --color-accent: #06b6d4;
+      --color-accent-light: #22d3ee;
+      --color-accent-dark: #0891b2;
+
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --color-danger: #ef4444;
+
+      --color-surface: #ffffff;
+      --color-surface-elevated: #f8fafc;
+      --color-surface-code: #0f172a;
+
+      --color-text-primary: #0f172a;
+      --color-text-secondary: #475569;
+      --color-text-tertiary: #94a3b8;
+      --color-text-inverse: #f1f5f9;
+
+      --color-border: #e2e8f0;
+      --color-border-light: #f1f5f9;
+
+      /* Typography */
+      --font-sans: 'Noto Sans JP', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.125rem;
+      --text-xl: 1.25rem;
+      --text-2xl: 1.5rem;
+      --text-3xl: 1.875rem;
+      --text-4xl: 2.25rem;
+      --text-5xl: 3rem;
+
+      /* Spacing (8dp system) */
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --space-20: 5rem;
+      --space-24: 6rem;
+
+      /* Elevation */
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+
+      /* Radius */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-2xl: 1.5rem;
+      --radius-full: 9999px;
+
+      /* Transitions */
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== Dark Mode ===== */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-surface: #0f172a;
+        --color-surface-elevated: #1e293b;
+        --color-surface-code: #020617;
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-text-tertiary: #64748b;
+        --color-text-inverse: #0f172a;
+        --color-border: #334155;
+        --color-border-light: #1e293b;
+        --color-primary-50: #172554;
+        --color-primary-100: #1e3a5f;
+      }
+    }
+
+    /* ===== Reduced Motion ===== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: var(--text-base);
+      line-height: 1.7;
+      color: var(--color-text-primary);
+      background: var(--color-surface);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ===== Skip Link (Accessibility) ===== */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: var(--space-4);
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-primary);
+      color: white;
+      border-radius: var(--radius-md);
+      z-index: 1000;
+      font-size: var(--text-sm);
+    }
+    .skip-link:focus {
+      top: var(--space-4);
+    }
+
+    /* ===== Navigation ===== */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border-bottom: 1px solid var(--color-border-light);
+      padding: var(--space-3) 0;
+    }
+    @media (prefers-color-scheme: dark) {
+      .nav { background: rgba(15,23,42,0.85); }
+    }
+
+    .nav-inner {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-weight: 700;
+      font-size: var(--text-lg);
+      color: var(--color-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .nav-logo svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: var(--space-1);
+      list-style: none;
+    }
+
+    .nav-links a {
+      display: block;
+      padding: var(--space-2) var(--space-3);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: var(--text-sm);
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      transition: color var(--transition-fast), background var(--transition-fast);
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus-visible {
+      color: var(--color-primary);
+      background: var(--color-primary-50);
+    }
+
+    .nav-links a:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+    }
+
+    /* ===== Hero ===== */
+    .hero {
+      position: relative;
+      padding: var(--space-24) var(--space-6) var(--space-20);
+      text-align: center;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-surface) 50%, rgba(6,182,212,0.05) 100%);
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-1) var(--space-4);
+      background: var(--color-primary-100);
+      color: var(--color-primary-dark);
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin-bottom: var(--space-6);
+    }
+
+    .hero h1 {
+      font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
+      font-weight: 800;
+      line-height: 1.15;
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-6);
+      letter-spacing: -0.025em;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: var(--text-lg);
+      color: var(--color-text-secondary);
+      max-width: 42rem;
+      margin: 0 auto var(--space-10);
+      line-height: 1.8;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    /* ===== Buttons ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-6);
+      font-size: var(--text-base);
+      font-weight: 600;
+      font-family: var(--font-sans);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition-fast);
+      min-height: 44px;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 3px;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+      box-shadow: 0 1px 3px rgb(37 99 235 / 0.3);
+    }
+    .btn-primary:hover { background: var(--color-primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+    }
+    .btn-secondary:hover { background: var(--color-surface-elevated); border-color: var(--color-primary-200); }
+
+    /* ===== Container ===== */
+    .container {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+
+    .container-narrow {
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+
+    /* ===== Sections ===== */
+    .section {
+      padding: var(--space-20) 0;
+    }
+
+    .section-alt {
+      background: var(--color-surface-elevated);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: var(--space-12);
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-3);
+    }
+
+    .section-title {
+      font-size: clamp(var(--text-2xl), 3.5vw, var(--text-4xl));
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: var(--space-4);
+      letter-spacing: -0.02em;
+    }
+
+    .section-desc {
+      font-size: var(--text-lg);
+      color: var(--color-text-secondary);
+      max-width: 36rem;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* ===== Cards ===== */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-6);
+    }
+
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      transition: all var(--transition-base);
+    }
+
+    .card:hover {
+      border-color: var(--color-primary-200);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-5);
+      font-size: var(--text-xl);
+    }
+
+    .card-icon-blue { background: var(--color-primary-100); color: var(--color-primary); }
+    .card-icon-cyan { background: rgba(6,182,212,0.12); color: var(--color-accent-dark); }
+    .card-icon-green { background: rgba(16,185,129,0.12); color: var(--color-success); }
+    .card-icon-amber { background: rgba(245,158,11,0.12); color: var(--color-warning); }
+
+    .card h3 {
+      font-size: var(--text-lg);
+      font-weight: 600;
+      margin-bottom: var(--space-3);
+    }
+
+    .card p {
+      color: var(--color-text-secondary);
+      font-size: var(--text-sm);
+      line-height: 1.7;
+    }
+
+    /* ===== Step Timeline ===== */
+    .timeline {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-10);
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: var(--space-6);
+      position: relative;
+    }
+
+    .step-marker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .step-number {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: var(--text-lg);
+      background: var(--color-primary);
+      color: white;
+      box-shadow: 0 2px 8px rgb(37 99 235 / 0.3);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-line {
+      width: 2px;
+      flex: 1;
+      background: var(--color-border);
+      margin-top: var(--space-2);
+    }
+
+    .step:last-child .step-line {
+      display: none;
+    }
+
+    .step-content {
+      padding-top: var(--space-2);
+    }
+
+    .step-content h3 {
+      font-size: var(--text-xl);
+      font-weight: 600;
+      margin-bottom: var(--space-3);
+    }
+
+    .step-content p {
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-4);
+      line-height: 1.8;
+    }
+
+    /* ===== Code Blocks ===== */
+    .code-block {
+      position: relative;
+      background: var(--color-surface-code);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin: var(--space-4) 0;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-3) var(--space-4);
+      background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .code-lang {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .code-dots {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .code-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: var(--radius-full);
+    }
+    .code-dot:nth-child(1) { background: #ef4444; }
+    .code-dot:nth-child(2) { background: #f59e0b; }
+    .code-dot:nth-child(3) { background: #10b981; }
+
+    .code-block pre {
+      padding: var(--space-4) var(--space-5);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .code-block code {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: 1.7;
+      color: #e2e8f0;
+      tab-size: 2;
+    }
+
+    /* Syntax colors */
+    .code-kw { color: #c084fc; }
+    .code-fn { color: #60a5fa; }
+    .code-str { color: #86efac; }
+    .code-cm { color: #64748b; }
+    .code-num { color: #fbbf24; }
+    .code-op { color: #94a3b8; }
+
+    /* ===== Concept Diagram ===== */
+    .diagram-container {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      margin: var(--space-8) 0;
+    }
+
+    .diagram-title {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      text-align: center;
+      margin-bottom: var(--space-6);
+    }
+
+    .diagram-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .diagram-node {
+      padding: var(--space-3) var(--space-5);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .diagram-node-primary {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .diagram-node-accent {
+      background: var(--color-accent);
+      color: white;
+    }
+
+    .diagram-node-outline {
+      border: 2px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    .diagram-arrow {
+      color: var(--color-text-tertiary);
+      font-size: var(--text-xl);
+      flex-shrink: 0;
+    }
+
+    /* ===== Info Box ===== */
+    .info-box {
+      display: flex;
+      gap: var(--space-4);
+      padding: var(--space-5) var(--space-6);
+      border-radius: var(--radius-lg);
+      margin: var(--space-6) 0;
+      font-size: var(--text-sm);
+      line-height: 1.7;
+    }
+
+    .info-box-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+    }
+
+    .info-box-tip {
+      background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.2);
+      color: var(--color-text-primary);
+    }
+    .info-box-tip .info-box-icon { color: var(--color-success); }
+
+    .info-box-warn {
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.2);
+      color: var(--color-text-primary);
+    }
+    .info-box-warn .info-box-icon { color: var(--color-warning); }
+
+    .info-box-note {
+      background: var(--color-primary-50);
+      border: 1px solid var(--color-primary-200);
+      color: var(--color-text-primary);
+    }
+    .info-box-note .info-box-icon { color: var(--color-primary); }
+
+    /* ===== Table ===== */
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: var(--space-6) 0;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-sm);
+    }
+
+    th {
+      background: var(--color-surface-elevated);
+      padding: var(--space-3) var(--space-4);
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border-light);
+      color: var(--color-text-primary);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tbody tr:hover { background: var(--color-primary-50); }
+
+    .tag {
+      display: inline-block;
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    .tag-blue { background: var(--color-primary-100); color: var(--color-primary-dark); }
+    .tag-green { background: rgba(16,185,129,0.12); color: #059669; }
+    .tag-cyan { background: rgba(6,182,212,0.12); color: var(--color-accent-dark); }
+
+    /* ===== Footer ===== */
+    .footer {
+      padding: var(--space-12) 0;
+      border-top: 1px solid var(--color-border);
+      text-align: center;
+    }
+
+    .footer p {
+      font-size: var(--text-sm);
+      color: var(--color-text-tertiary);
+    }
+
+    .footer a {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ===== Mobile Responsive ===== */
+    @media (max-width: 640px) {
+      .hero { padding: var(--space-16) var(--space-4) var(--space-12); }
+      .section { padding: var(--space-12) 0; }
+      .step { grid-template-columns: 48px 1fr; gap: var(--space-4); }
+      .step-number { width: 40px; height: 40px; font-size: var(--text-base); }
+      .card { padding: var(--space-6); }
+      .diagram-flow { flex-direction: column; }
+      .diagram-arrow { transform: rotate(90deg); }
+    }
+
+    /* ===== Part Divider (new, additive only) ===== */
+    .part-divider {
+      width: 100%;
+    }
+
+    /* ===== Architecture SVG Diagram ===== */
+    .arch-svg-wrap {
+      display: flex;
+      justify-content: center;
+      margin: var(--space-8) 0;
+    }
+  </style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">メインコンテンツへスキップ</a>
+
+<!-- ===== Navigation ===== -->
+<nav class="nav" role="navigation" aria-label="メインナビゲーション">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" aria-label="UR5 Teaching Lab ホーム">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+      UR5 Teaching Lab
+    </a>
+    <ul class="nav-links">
+      <li><a href="#overview">概要</a></li>
+      <li><a href="#setup">セットアップ</a></li>
+      <li><a href="#architecture">Part 1: 制御</a></li>
+      <li><a href="#ik">IK</a></li>
+      <li><a href="#env-interface">Part 2: RL</a></li>
+      <li><a href="#project-structure">構成</a></li>
+      <li><a href="#advanced">応用</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ===== Hero ===== -->
+<header class="hero">
+  <div class="hero-badge">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    Isaac Lab 2.2+ 対応
+  </div>
+  <h1>
+    UR5 ロボットアーム<br>
+    <span>制御チュートリアル</span>
+  </h1>
+  <p class="hero-subtitle">
+    関節角度の手動入力からPPO強化学習まで、<br>
+    ステップバイステップでロボット制御の基礎を学びましょう。
+  </p>
+  <div class="hero-actions">
+    <a href="#setup" class="btn btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      はじめる
+    </a>
+    <a href="#architecture" class="btn btn-secondary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      アーキテクチャを見る
+    </a>
+  </div>
+</header>
+
+<!-- ===== Main Content ===== -->
+<main id="main">
+
+<!-- ===== Overview ===== -->
+<section id="overview" class="section" aria-labelledby="overview-title">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Overview</span>
+      <h2 class="section-title" id="overview-title">このチュートリアルで学べること</h2>
+      <p class="section-desc">NVIDIA Isaac Lab上でUR5ロボットアームの制御を体験し、強化学習の基礎を身につけます。</p>
+    </div>
+
+    <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); max-width: 56rem; margin: 0 auto;">
+      <!-- Part 1 Card -->
+      <div class="card" style="border-top: 4px solid var(--color-primary);">
+        <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5);">
+          <div class="card-icon card-icon-blue" style="margin-bottom: 0;" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <span style="font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-primary); background: var(--color-primary-100); padding: 2px 10px; border-radius: var(--radius-full);">Part 1</span>
+        </div>
+        <h3>シミュレーション＆ロボット制御</h3>
+        <p style="margin-bottom: var(--space-4);">Isaac Lab シミュレーション環境の構築から始まり、UR5ロボットの設定と手動関節制御を体験します。</p>
+        <ul style="color: var(--color-text-secondary); font-size: var(--text-sm); line-height: 2; padding-left: var(--space-4);">
+          <li>Isaac Lab シミュレーション環境</li>
+          <li>UR5 ロボット設定（6関節）</li>
+          <li>手動関節制御インタフェース</li>
+          <li>末端位置（EE）トラッキング</li>
+        </ul>
+      </div>
+
+      <!-- Part 2 Card -->
+      <div class="card" style="border-top: 4px solid var(--color-accent-dark);">
+        <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5);">
+          <div class="card-icon card-icon-cyan" style="margin-bottom: 0;" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <span style="font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-accent-dark); background: rgba(6,182,212,0.12); padding: 2px 10px; border-radius: var(--radius-full);">Part 2</span>
+        </div>
+        <h3>強化学習</h3>
+        <p style="margin-bottom: var(--space-4);">Gymnasium環境インタフェースを通じてPPOエージェントを訓練し、報酬設計とハイパーパラメータ調整を学びます。</p>
+        <ul style="color: var(--color-text-secondary); font-size: var(--text-sm); line-height: 2; padding-left: var(--space-4);">
+          <li>Gymnasium 環境インタフェース</li>
+          <li>PPO アルゴリズムによる学習</li>
+          <li>報酬関数の設計</li>
+          <li>ハイパーパラメータチューニング</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Setup ===== -->
+<section id="setup" class="section section-alt" aria-labelledby="setup-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Setup</span>
+      <h2 class="section-title" id="setup-title">セットアップ手順</h2>
+      <p class="section-desc">3ステップで環境を構築します。</p>
+    </div>
+
+    <div class="timeline">
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-marker">
+          <div class="step-number">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <h3>前提条件の確認</h3>
+          <p>Isaac Sim と Isaac Lab がインストール済みであることを確認します。</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ソフトウェア</th><th>最低バージョン</th></tr></thead>
+              <tbody>
+                <tr><td>NVIDIA Isaac Sim</td><td>4.5+</td></tr>
+                <tr><td>Isaac Lab</td><td>2.2+</td></tr>
+                <tr><td>Python</td><td>3.10+</td></tr>
+                <tr><td>GPU</td><td>RTX 2070 以上</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-marker">
+          <div class="step-number">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <h3>パッケージのインストール</h3>
+          <p>Isaac Lab の Python 環境で開発モードインストールを行います。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+              <span class="code-lang">Terminal</span>
+            </div>
+            <pre><code><span class="code-cm"># Isaac Lab 環境を有効化</span>
+conda activate isaaclab
+
+<span class="code-cm"># プロジェクトディレクトリに移動</span>
+<span class="code-kw">cd</span> ur5_teaching
+
+<span class="code-cm"># 開発モードでインストール</span>
+pip install <span class="code-op">-e</span> .</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-marker">
+          <div class="step-number">3</div>
+        </div>
+        <div class="step-content">
+          <h3>インストールの確認</h3>
+          <p>環境が正しく登録されたことを確認します。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+              <span class="code-lang">Terminal</span>
+            </div>
+            <pre><code>python <span class="code-op">-c</span> <span class="code-str">"import ur5_lab; print('OK')"</span></code></pre>
+          </div>
+          <div class="info-box info-box-tip">
+            <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div><strong>確認ポイント：</strong>「OK」と表示されれば、環境 <code>Isaac-UR5-Reach-v0</code> が gymnasium に正常に登録されています。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- PART 1 DIVIDER -->
+<!-- ================================================================ -->
+<div class="part-divider" style="background: linear-gradient(135deg, var(--color-primary), #7c3aed); padding: var(--space-12) var(--space-6); text-align: center; color: white;">
+  <div style="font-size: var(--text-sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; margin-bottom: var(--space-2);">Part 1</div>
+  <div style="font-size: var(--text-3xl); font-weight: 800;">シミュレーション＆ロボット制御</div>
+  <div style="font-size: var(--text-base); opacity: 0.85; margin-top: var(--space-3);">Simulation &amp; Robot Control</div>
+</div>
+
+<!-- ===== Isaac Lab Architecture ===== -->
+<section id="architecture" class="section" aria-labelledby="arch-title">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Architecture</span>
+      <h2 class="section-title" id="arch-title">Isaac Lab アーキテクチャ</h2>
+      <p class="section-desc">Isaac Lab の階層構造とUR5シーンのセットアップを理解しましょう。</p>
+    </div>
+
+    <!-- Layered Architecture SVG -->
+    <div class="arch-svg-wrap">
+      <svg width="560" height="400" viewBox="0 0 560 400" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Isaac Lab 階層アーキテクチャ図">
+        <defs>
+          <marker id="arrow-up" markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
+            <polygon points="5 0, 10 7, 0 7" fill="#94a3b8"/>
+          </marker>
+          <marker id="arrow-down" markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto-start-reverse">
+            <polygon points="5 0, 10 7, 0 7" fill="#94a3b8"/>
+          </marker>
+        </defs>
+
+        <!-- Layer 1: RL Agent (top) -->
+        <rect x="60" y="20" width="440" height="72" rx="12" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
+        <text x="280" y="52" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="15" font-weight="700" fill="#ef4444">RL エージェント (PPO)</text>
+        <text x="280" y="74" text-anchor="middle" font-family="'JetBrains Mono','Consolas',monospace" font-size="12" fill="#b91c1c">skrl / PPO Policy ネットワーク</text>
+
+        <!-- Arrow: Agent → Gym (action down) -->
+        <line x1="200" y1="92" x2="200" y2="122" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-down)"/>
+        <text x="212" y="112" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">行動 (6D delta)</text>
+
+        <!-- Arrow: Gym → Agent (obs + reward up) -->
+        <line x1="340" y1="122" x2="340" y2="92" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-up)"/>
+        <text x="352" y="112" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">観測 + 報酬</text>
+
+        <!-- Layer 2: Gymnasium Environment -->
+        <rect x="60" y="128" width="440" height="72" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+        <text x="280" y="160" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="15" font-weight="700" fill="#b45309">Gymnasium 環境 (DirectRLEnv)</text>
+        <text x="280" y="182" text-anchor="middle" font-family="'JetBrains Mono','Consolas',monospace" font-size="12" fill="#92400e">_get_obs / _get_rewards / _get_dones / _reset_idx</text>
+
+        <!-- Arrow: Gym → Isaac Lab (command down) -->
+        <line x1="200" y1="200" x2="200" y2="232" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-down)"/>
+        <text x="212" y="221" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">関節指令</text>
+
+        <!-- Arrow: Isaac Lab → Gym (state up) -->
+        <line x1="340" y1="232" x2="340" y2="200" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-up)"/>
+        <text x="352" y="221" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">センサ状態</text>
+
+        <!-- Layer 3: Isaac Lab -->
+        <rect x="60" y="238" width="440" height="72" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+        <text x="280" y="270" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="15" font-weight="700" fill="#059669">Isaac Lab (Articulation / Sensors)</text>
+        <text x="280" y="292" text-anchor="middle" font-family="'JetBrains Mono','Consolas',monospace" font-size="12" fill="#065f46">Robot + FrameTransformer + Ground + Light</text>
+
+        <!-- Arrow: Isaac Lab → PhysX (simulate) -->
+        <line x1="200" y1="310" x2="200" y2="342" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-down)"/>
+        <text x="212" y="331" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">シミュレーション呼び出し</text>
+
+        <!-- Arrow: PhysX → Isaac Lab (physics result) -->
+        <line x1="340" y1="342" x2="340" y2="310" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-up)"/>
+        <text x="352" y="331" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">物理演算結果</text>
+
+        <!-- Layer 4: Isaac Sim / PhysX (bottom) -->
+        <rect x="60" y="348" width="440" height="38" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+        <text x="280" y="372" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="14" font-weight="700" fill="#1d4ed8">Isaac Sim / PhysX  —  物理エンジン</text>
+      </svg>
+    </div>
+
+    <!-- Scene setup explanation -->
+    <div style="max-width: 48rem; margin: 0 auto;">
+      <h3 style="font-size: var(--text-xl); font-weight: 600; margin-bottom: var(--space-4);">UR5 シーン構成</h3>
+      <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-6);">
+        シミュレーション環境は <code>_setup_scene()</code> メソッドで構成されます。
+        ロボット本体、末端位置を計測するセンサ（FrameTransformer）、地面、照明の4要素から成ります。
+      </p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+          <span class="code-lang">Python — ur5_reach_env.py</span>
+        </div>
+        <pre><code><span class="code-kw">def</span> <span class="code-fn">_setup_scene</span>(<span class="code-kw">self</span>):
+    <span class="code-cm"># 1. UR5 ロボットを生成</span>
+    <span class="code-kw">self</span>.robot <span class="code-op">=</span> <span class="code-fn">Articulation</span>(<span class="code-kw">self</span>.cfg.robot_cfg)
+
+    <span class="code-cm"># 2. 末端エフェクタ位置センサ</span>
+    <span class="code-kw">self</span>.ee_frame <span class="code-op">=</span> <span class="code-fn">FrameTransformer</span>(<span class="code-kw">self</span>.cfg.ee_frame_cfg)
+
+    <span class="code-cm"># 3. 地面を追加</span>
+    <span class="code-fn">spawn_ground_plane</span>(prim_path<span class="code-op">=</span><span class="code-str">"/World/ground"</span>,
+                       cfg<span class="code-op">=</span><span class="code-fn">GroundPlaneCfg</span>())
+
+    <span class="code-cm"># 4. 照明を追加</span>
+    <span class="code-fn">spawn_light</span>(prim_path<span class="code-op">=</span><span class="code-str">"/World/light"</span>,
+                cfg<span class="code-op">=</span><span class="code-fn">DomeLightCfg</span>(intensity<span class="code-op">=</span><span class="code-num">3000.0</span>))
+
+    <span class="code-cm"># 5. シーンに登録</span>
+    <span class="code-kw">self</span>.scene.articulations[<span class="code-str">"robot"</span>] <span class="code-op">=</span> <span class="code-kw">self</span>.robot
+    <span class="code-kw">self</span>.scene.sensors[<span class="code-str">"ee_frame"</span>] <span class="code-op">=</span> <span class="code-kw">self</span>.ee_frame
+
+    <span class="code-cm"># 6. 並列環境のクローン生成</span>
+    <span class="code-kw">self</span>.scene.clone_environments(copy_from_source<span class="code-op">=</span><span class="code-kw">False</span>)</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== UR5 Robot ===== -->
+<section id="robot" class="section section-alt" aria-labelledby="robot-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Robot</span>
+      <h2 class="section-title" id="robot-title">UR5 ロボット構成</h2>
+      <p class="section-desc">UR5は6自由度の産業用ロボットアームです。各関節の役割と設定を確認しましょう。</p>
+    </div>
+
+    <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">関節構造</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>関節番号</th><th>関節名</th><th>軸</th><th>可動範囲</th><th>役割</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-blue">J1</span></td>
+            <td><code>shoulder_pan_joint</code></td>
+            <td>Z軸</td>
+            <td>±360°</td>
+            <td>ベース水平回転</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-blue">J2</span></td>
+            <td><code>shoulder_lift_joint</code></td>
+            <td>Y軸</td>
+            <td>±360°</td>
+            <td>肩の前後傾き</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-blue">J3</span></td>
+            <td><code>elbow_joint</code></td>
+            <td>Y軸</td>
+            <td>±360°</td>
+            <td>肘の屈伸</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-cyan">J4</span></td>
+            <td><code>wrist_1_joint</code></td>
+            <td>Y軸</td>
+            <td>±360°</td>
+            <td>手首第1軸</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-cyan">J5</span></td>
+            <td><code>wrist_2_joint</code></td>
+            <td>Z軸</td>
+            <td>±360°</td>
+            <td>手首第2軸</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-cyan">J6</span></td>
+            <td><code>wrist_3_joint</code></td>
+            <td>Y軸</td>
+            <td>±360°</td>
+            <td>手首第3軸（回転）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size: var(--text-lg); font-weight: 600; margin: var(--space-8) 0 var(--space-4);">アクチュエータ設定</h3>
+    <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-4);">
+      各関節はPDコントローラで駆動されます。<strong>stiffness（剛性）</strong>は目標角度への追従強さ、
+      <strong>damping（減衰）</strong>は振動を抑える役割を持ちます。
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <span class="code-lang">Python — ur5_cfg.py</span>
+      </div>
+      <pre><code>UR5_CFG <span class="code-op">=</span> <span class="code-fn">ArticulationCfg</span>(
+    spawn<span class="code-op">=</span><span class="code-fn">UsdFileCfg</span>(
+        usd_path<span class="code-op">=</span><span class="code-str">f"{UR5_ASSETS_DIR}/ur5_moveit.usd"</span>,
+        rigid_props<span class="code-op">=</span><span class="code-fn">RigidBodyPropertiesCfg</span>(
+            disable_gravity<span class="code-op">=</span><span class="code-kw">False</span>,
+        ),
+        articulation_props<span class="code-op">=</span><span class="code-fn">ArticulationRootPropertiesCfg</span>(
+            enabled_self_collisions<span class="code-op">=</span><span class="code-kw">True</span>,
+        ),
+    ),
+    actuators<span class="code-op">=</span>{
+        <span class="code-str">"arm"</span>: <span class="code-fn">ImplicitActuatorCfg</span>(
+            joint_names_expr<span class="code-op">=</span>[<span class="code-str">".*"</span>],     <span class="code-cm"># 全関節に適用</span>
+            stiffness<span class="code-op">=</span><span class="code-num">800.0</span>,             <span class="code-cm"># 位置追従ゲイン</span>
+            damping<span class="code-op">=</span><span class="code-num">40.0</span>,               <span class="code-cm"># 速度減衰ゲイン</span>
+        ),
+    },
+    init_state<span class="code-op">=</span><span class="code-fn">ArticulationCfg.InitialStateCfg</span>(
+        joint_pos<span class="code-op">=</span>{
+            <span class="code-str">"shoulder_pan_joint"</span>:   <span class="code-num">0.0</span>,
+            <span class="code-str">"shoulder_lift_joint"</span>: <span class="code-op">-</span><span class="code-num">1.5708</span>,  <span class="code-cm"># -90°</span>
+            <span class="code-str">"elbow_joint"</span>:          <span class="code-num">1.5708</span>,  <span class="code-cm"># +90°</span>
+            <span class="code-str">"wrist_1_joint"</span>:       <span class="code-op">-</span><span class="code-num">1.5708</span>,  <span class="code-cm"># -90°</span>
+            <span class="code-str">"wrist_2_joint"</span>:       <span class="code-op">-</span><span class="code-num">1.5708</span>,  <span class="code-cm"># -90°</span>
+            <span class="code-str">"wrist_3_joint"</span>:        <span class="code-num">0.0</span>,
+        },
+    ),
+)</code></pre>
+    </div>
+
+    <div class="info-box info-box-note">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div>
+        <strong>ホームポジション：</strong>
+        J1=0.0, J2=-90°, J3=+90°, J4=-90°, J5=-90°, J6=0.0 rad。
+        この姿勢ではアームが垂直に上を向き、末端位置は概ねロボットベース真上に来ます。
+        stiffness=800, damping=40 は安定したPD制御に適した値です。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Manual Control ===== -->
+<section id="manual" class="section" aria-labelledby="manual-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Part 1 — Step 1</span>
+      <h2 class="section-title" id="manual-title">手動制御モード</h2>
+      <p class="section-desc">まず手動でロボットを動かし、関節空間の感覚を掴みましょう。</p>
+    </div>
+
+    <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">起動方法</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <span class="code-lang">Terminal</span>
+      </div>
+      <pre><code>python scripts/manual_joint_control.py <span class="code-op">--num_envs</span> <span class="code-num">1</span></code></pre>
+    </div>
+
+    <h3 style="font-size: var(--text-lg); font-weight: 600; margin: var(--space-8) 0 var(--space-4);">操作コマンド一覧</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>コマンド</th><th>説明</th><th>使用例</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-blue">6つの数値</span></td>
+            <td>関節目標角度を設定 (ラジアン)</td>
+            <td><code>-0.5 -1.0 1.5 -2.0 -1.5 0.0</code></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-green">ee X Y Z</span></td>
+            <td>IKで末端をワールド位置へ移動</td>
+            <td><code>ee 0.5 0.0 1.2</code></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-green">home</span></td>
+            <td>ホームポジションに戻る</td>
+            <td><code>home</code></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-cyan">random</span></td>
+            <td>ランダムな動作を実行</td>
+            <td><code>random</code></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-cyan">info</span></td>
+            <td>現在の状態を表示</td>
+            <td><code>info</code></td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-blue">quit</span></td>
+            <td>終了</td>
+            <td><code>quit</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Subsection: EE Position -->
+    <h3 style="font-size: var(--text-xl); font-weight: 600; margin: var(--space-10) 0 var(--space-4);">末端エフェクタ位置を理解する</h3>
+    <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-6);">
+      ロボットの末端（ハンド）がワールド座標のどこにあるかを知るには、
+      Isaac Lab の <strong>FrameTransformer</strong> センサを使います。
+      このセンサは、指定したフレームの位置・姿勢をリアルタイムで計測します。
+      関節角度から末端位置を計算する処理（順運動学）はPhysXが自動的に行います。
+    </p>
+
+    <!-- Flow diagram: joint angles → FK → EE -->
+    <div class="diagram-container">
+      <div class="diagram-title">関節角度 → 末端位置 の変換フロー</div>
+      <div class="diagram-flow">
+        <div class="diagram-node diagram-node-primary">関節角度<br><small>J1 … J6 (rad)</small></div>
+        <div class="diagram-arrow" aria-hidden="true">
+          <svg width="32" height="24" viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h28M22 6l8 6-8 6"/></svg>
+        </div>
+        <div class="diagram-node" style="background: rgba(124,58,237,0.12); color: #7c3aed; border-radius: var(--radius-lg); font-size: var(--text-sm); font-weight: 600; text-align: center; min-width: 120px; padding: var(--space-3) var(--space-5);">順運動学<br><small>PhysX 自動計算</small></div>
+        <div class="diagram-arrow" aria-hidden="true">
+          <svg width="32" height="24" viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h28M22 6l8 6-8 6"/></svg>
+        </div>
+        <div class="diagram-node diagram-node-accent">EE 位置<br><small>X, Y, Z (m)</small></div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <span class="code-lang">Python — 末端位置と関節角度の取得</span>
+      </div>
+      <pre><code><span class="code-cm"># 末端エフェクタのワールド座標位置を取得</span>
+<span class="code-kw">def</span> <span class="code-fn">get_ee_pos_world</span>(<span class="code-kw">self</span>) <span class="code-op">-&gt;</span> torch.Tensor:
+    <span class="code-cm"># shape: (num_envs, 3)  [x, y, z]</span>
+    <span class="code-kw">return</span> <span class="code-kw">self</span>.ee_frame.data.target_pos_w[..., <span class="code-num">0</span>, :]
+
+<span class="code-cm"># 現在の全関節角度を取得</span>
+<span class="code-kw">def</span> <span class="code-fn">get_joint_positions</span>(<span class="code-kw">self</span>) <span class="code-op">-&gt;</span> torch.Tensor:
+    <span class="code-cm"># shape: (num_envs, 6)  各関節の角度 (rad)</span>
+    <span class="code-kw">return</span> <span class="code-kw">self</span>.robot.data.joint_pos
+
+<span class="code-cm"># 目標位置との距離を計算</span>
+ee_pos  <span class="code-op">=</span> <span class="code-fn">get_ee_pos_world</span>()            <span class="code-cm"># (N, 3)</span>
+dist    <span class="code-op">=</span> torch.<span class="code-fn">norm</span>(ee_pos <span class="code-op">-</span> target_pos, dim<span class="code-op">=-</span><span class="code-num">1</span>)  <span class="code-cm"># (N,)</span></code></pre>
+    </div>
+
+    <div class="info-box info-box-note">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div>
+        <strong>学習ポイント：</strong>
+        <code>info</code> コマンドで末端位置と目標位置の距離を確認しましょう。
+        関節角度を変えると末端がどう動くか観察することが、ロボットの運動学を理解する第一歩です。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Inverse Kinematics ===== -->
+<section id="ik" class="section section-alt" aria-labelledby="ik-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Part 1 — Step 2</span>
+      <h2 class="section-title" id="ik-title">逆運動学 (IK) 制御</h2>
+      <p class="section-desc">末端の目標位置 (XYZ) から関節角度を自動計算し、直感的にロボットを制御します。</p>
+    </div>
+
+    <!-- FK vs IK diagram -->
+    <div class="diagram-container">
+      <div class="diagram-title">順運動学 (FK) と 逆運動学 (IK) の比較</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-4);">
+        <!-- FK -->
+        <div style="text-align: center;">
+          <div style="font-size: var(--text-sm); font-weight: 600; color: var(--color-text-secondary); margin-bottom: var(--space-3);">FK: 順運動学</div>
+          <div class="diagram-flow" style="justify-content: center;">
+            <div class="diagram-node diagram-node-primary" style="min-width: 90px; font-size: var(--text-sm);">関節角度<br><small>6 values</small></div>
+            <div class="diagram-arrow" aria-hidden="true">
+              <svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10h24M20 4l6 6-6 6"/></svg>
+            </div>
+            <div class="diagram-node diagram-node-accent" style="min-width: 90px; font-size: var(--text-sm);">EE 位置<br><small>X, Y, Z</small></div>
+          </div>
+        </div>
+        <!-- IK -->
+        <div style="text-align: center;">
+          <div style="font-size: var(--text-sm); font-weight: 600; color: var(--color-text-secondary); margin-bottom: var(--space-3);">IK: 逆運動学</div>
+          <div class="diagram-flow" style="justify-content: center;">
+            <div class="diagram-node diagram-node-accent" style="min-width: 90px; font-size: var(--text-sm);">EE 目標<br><small>X, Y, Z</small></div>
+            <div class="diagram-arrow" aria-hidden="true">
+              <svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10h24M20 4l6 6-6 6"/></svg>
+            </div>
+            <div class="diagram-node diagram-node-primary" style="min-width: 90px; font-size: var(--text-sm);">関節角度<br><small>6 values</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-4);">
+      順運動学 (FK) は「関節角度 → 末端位置」の計算で、PhysX が自動的に行います。<br>
+      逆運動学 (IK) はその逆で、「目標の末端位置 → 必要な関節角度」を求めます。
+    </p>
+
+    <h3 style="font-size: var(--text-lg); font-weight: 600; margin: var(--space-6) 0 var(--space-4);">Differential IK アルゴリズム</h3>
+    <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-4);">
+      本環境では Isaac Lab の <strong>DifferentialIKController</strong> を使用します。
+      これはヤコビ行列の擬似逆行列を用いて、末端の位置誤差を関節角度の変化量に変換します：
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <span class="code-lang">Math — Differential IK</span>
+      </div>
+      <pre><code><span class="code-cm"># Differential IK の基本式</span>
+<span class="code-cm"># Δq = J† × Δx</span>
+<span class="code-cm"># q_desired = q_current + Δq</span>
+<span class="code-cm">#</span>
+<span class="code-cm"># J†  = ヤコビ行列の擬似逆行列 (pseudo-inverse)</span>
+<span class="code-cm"># Δx  = 末端の目標位置 - 現在位置 (position error)</span>
+<span class="code-cm"># Δq  = 関節角度の変化量 (joint delta)</span></code></pre>
+    </div>
+
+    <h3 style="font-size: var(--text-lg); font-weight: 600; margin: var(--space-8) 0 var(--space-4);">使い方</h3>
+    <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-4);">
+      手動制御スクリプトで <code>ee</code> コマンドを使います：
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <span class="code-lang">Terminal — IK で末端位置を指定</span>
+      </div>
+      <pre><code><span class="code-cm"># ワールド座標 (0.5, 0.0, 1.2) に末端を移動</span>
+> ee <span class="code-num">0.5</span> <span class="code-num">0.0</span> <span class="code-num">1.2</span>
+  → IK目標EE位置: (<span class="code-num">0.500</span>, <span class="code-num">0.000</span>, <span class="code-num">1.200</span>)
+  [IK] Current EE: (<span class="code-num">0.612</span>, <span class="code-num">-0.003</span>, <span class="code-num">0.987</span>)
+
+<span class="code-cm"># info で到達結果を確認</span>
+> info
+  Joint angles: [-0.568, -0.912, 1.345, ...]
+  End-effector position: [<span class="code-num">0.501</span>, <span class="code-num">0.002</span>, <span class="code-num">1.198</span>]
+  Distance to target: <span class="code-num">0.0031</span> m</code></pre>
+    </div>
+
+    <h3 style="font-size: var(--text-lg); font-weight: 600; margin: var(--space-8) 0 var(--space-4);">内部実装</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <span class="code-lang">Python — compute_ik() の実装</span>
+      </div>
+      <pre><code><span class="code-kw">def</span> <span class="code-fn">compute_ik</span>(<span class="code-kw">self</span>, target_pos_w: torch.Tensor) <span class="code-op">-&gt;</span> torch.Tensor:
+    <span class="code-cm"># 1. 現在の EE 位置・姿勢を取得</span>
+    ee_pos_w  <span class="code-op">=</span> <span class="code-kw">self</span>.<span class="code-fn">get_ee_pos_world</span>()
+    ee_quat_w <span class="code-op">=</span> <span class="code-kw">self</span>.<span class="code-fn">get_ee_quat_world</span>()
+
+    <span class="code-cm"># 2. ワールド座標 → ロボットベース座標に変換</span>
+    ee_pos_b, ee_quat_b <span class="code-op">=</span> <span class="code-fn">subtract_frame_transforms</span>(
+        robot_pos_w, robot_quat_w, ee_pos_w, ee_quat_w)
+
+    <span class="code-cm"># 3. IK コントローラに目標を設定</span>
+    <span class="code-kw">self</span>.ik_controller.<span class="code-fn">set_command</span>(target_pos_b,
+        ee_pos<span class="code-op">=</span>ee_pos_b, ee_quat<span class="code-op">=</span>ee_quat_b)
+
+    <span class="code-cm"># 4. PhysX からヤコビアンを取得しベース座標に変換</span>
+    jacobian <span class="code-op">=</span> robot.root_physx_view.<span class="code-fn">get_jacobians</span>()
+    jacobian_b <span class="code-op">=</span> <span class="code-fn">rotate_to_base_frame</span>(jacobian)
+
+    <span class="code-cm"># 5. IK を解いて目標関節角度を計算</span>
+    joint_pos_des <span class="code-op">=</span> <span class="code-kw">self</span>.ik_controller.<span class="code-fn">compute</span>(
+        ee_pos_b, ee_quat_b, jacobian_b, joint_pos)
+
+    <span class="code-kw">return</span> joint_pos_des  <span class="code-cm"># shape: (N, 6)</span></code></pre>
+    </div>
+
+    <div class="info-box info-box-tip">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div>
+        <strong>実験してみよう：</strong>
+        同じ末端位置に対して <code>ee X Y Z</code> と手動の関節角度入力の両方を試してみましょう。
+        IK は「正解」を一瞬で計算しますが、手動では試行錯誤が必要です。
+        この差がまさに RL が解決しようとする問題です。
+      </div>
+    </div>
+
+    <div class="info-box info-box-warn" style="margin-top: var(--space-4);">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div>
+        <strong>注意：</strong>
+        IK は一般的に解が複数存在します（同じ末端位置に異なる関節角度の組み合わせで到達可能）。
+        また、目標位置がロボットの到達範囲外の場合、IK は最も近い到達可能な姿勢を返します。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- PART 2 DIVIDER -->
+<!-- ================================================================ -->
+<div class="part-divider" style="background: linear-gradient(135deg, var(--color-accent-dark), #2563eb); padding: var(--space-12) var(--space-6); text-align: center; color: white;">
+  <div style="font-size: var(--text-sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; margin-bottom: var(--space-2);">Part 2</div>
+  <div style="font-size: var(--text-3xl); font-weight: 800;">強化学習</div>
+  <div style="font-size: var(--text-base); opacity: 0.85; margin-top: var(--space-3);">Reinforcement Learning</div>
+</div>
+
+<!-- ===== Environment Interface ===== -->
+<section id="env-interface" class="section section-alt" aria-labelledby="env-title">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Part 2 — Environment</span>
+      <h2 class="section-title" id="env-title">環境インタフェース</h2>
+      <p class="section-desc">DirectRLEnv を継承した UR5 環境の構造と、観測・行動・報酬の定義を理解しましょう。</p>
+    </div>
+
+    <!-- 5 Key Methods -->
+    <div style="max-width: 48rem; margin: 0 auto var(--space-12);">
+      <h3 style="font-size: var(--text-xl); font-weight: 600; margin-bottom: var(--space-6);">DirectRLEnv の5つの主要メソッド</h3>
+      <div class="card-grid" style="grid-template-columns: 1fr; gap: var(--space-4);">
+        <div style="display: flex; gap: var(--space-4); align-items: flex-start; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5);">
+          <code style="background: var(--color-primary-100); color: var(--color-primary-dark); padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight: 700; flex-shrink: 0; margin-top: 2px;">_setup_scene</code>
+          <span style="color: var(--color-text-secondary); font-size: var(--text-sm);">ロボット・センサ・環境オブジェクトを生成し、並列クローンを構築する。</span>
+        </div>
+        <div style="display: flex; gap: var(--space-4); align-items: flex-start; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5);">
+          <code style="background: var(--color-primary-100); color: var(--color-primary-dark); padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight: 700; flex-shrink: 0; margin-top: 2px;">_get_observations</code>
+          <span style="color: var(--color-text-secondary); font-size: var(--text-sm);">エージェントに渡す観測テンソルを組み立てる。関節角度・速度・目標位置の15次元ベクトル。</span>
+        </div>
+        <div style="display: flex; gap: var(--space-4); align-items: flex-start; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5);">
+          <code style="background: var(--color-primary-100); color: var(--color-primary-dark); padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight: 700; flex-shrink: 0; margin-top: 2px;">_get_rewards</code>
+          <span style="color: var(--color-text-secondary); font-size: var(--text-sm);">末端距離・tanh ボーナス・行動ペナルティを合算してスカラー報酬を返す。</span>
+        </div>
+        <div style="display: flex; gap: var(--space-4); align-items: flex-start; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5);">
+          <code style="background: var(--color-primary-100); color: var(--color-primary-dark); padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight: 700; flex-shrink: 0; margin-top: 2px;">_get_dones</code>
+          <span style="color: var(--color-text-secondary); font-size: var(--text-sm);">エピソード終了条件（ゴール達成 / タイムアウト）をチェックしてブールマスクを返す。</span>
+        </div>
+        <div style="display: flex; gap: var(--space-4); align-items: flex-start; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5);">
+          <code style="background: var(--color-primary-100); color: var(--color-primary-dark); padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight: 700; flex-shrink: 0; margin-top: 2px;">_reset_idx</code>
+          <span style="color: var(--color-text-secondary); font-size: var(--text-sm);">完了した環境を再初期化し、新しい目標位置をランダムサンプリングする。</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Observation Table -->
+    <div style="max-width: 48rem; margin: 0 auto var(--space-12);">
+      <h3 style="font-size: var(--text-xl); font-weight: 600; margin-bottom: var(--space-4);">観測空間 (15次元)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>次元</th>
+              <th>内容</th>
+              <th>サイズ</th>
+              <th>説明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-blue">0–5</span></td>
+              <td>関節角度</td>
+              <td>6</td>
+              <td>6つの関節の現在角度 (rad)</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-cyan">6–11</span></td>
+              <td>関節速度</td>
+              <td>6</td>
+              <td>6つの関節の角速度 (rad/s)</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-green">12–14</span></td>
+              <td>目標位置</td>
+              <td>3</td>
+              <td>ベース座標系での目標 XYZ 位置 (m)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Action Space -->
+    <div style="max-width: 48rem; margin: 0 auto var(--space-12);">
+      <h3 style="font-size: var(--text-xl); font-weight: 600; margin-bottom: var(--space-4);">行動空間 (6次元)</h3>
+      <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-4);">
+        エージェントが出力する行動は、各関節への <strong>デルタ角度</strong>（変化量）です。
+        現在の関節角度に行動を加算して目標角度を計算し、PDコントローラへ渡します。
+        値の範囲はスケールにより制限されており、1ステップで大きく動きすぎないように設計されています。
+      </p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+          <span class="code-lang">Python — 行動の適用</span>
+        </div>
+        <pre><code><span class="code-kw">def</span> <span class="code-fn">_apply_action</span>(<span class="code-kw">self</span>):
+    <span class="code-cm"># エージェントの出力: delta 関節角度 (num_envs, 6)</span>
+    delta <span class="code-op">=</span> <span class="code-kw">self</span>.action_manager.action <span class="code-op">*</span> <span class="code-kw">self</span>.cfg.action_scale
+
+    <span class="code-cm"># 現在角度 + delta = 新しい目標角度</span>
+    target <span class="code-op">=</span> <span class="code-kw">self</span>.robot.data.joint_pos <span class="code-op">+</span> delta
+
+    <span class="code-cm"># PD コントローラへ目標角度を送信</span>
+    <span class="code-kw">self</span>.robot.<span class="code-fn">set_joint_position_target</span>(target)</code></pre>
+      </div>
+    </div>
+
+    <!-- Reward Function -->
+    <div style="max-width: 48rem; margin: 0 auto;">
+      <h3 style="font-size: var(--text-xl); font-weight: 600; margin-bottom: var(--space-4);">報酬関数</h3>
+      <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-4);">
+        報酬は3つの項目から構成されます。距離ペナルティで大域的な誘導を行い、
+        tanhボーナスで目標近傍の精密な到達を促し、行動ペナルティで動作を滑らかに保ちます。
+      </p>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+          <span class="code-lang">Python — ur5_reach_env.py 報酬関数</span>
+        </div>
+        <pre><code><span class="code-kw">def</span> <span class="code-fn">_get_rewards</span>(<span class="code-kw">self</span>) <span class="code-op">-&gt;</span> torch.Tensor:
+    ee_pos  <span class="code-op">=</span> <span class="code-kw">self</span>.<span class="code-fn">get_ee_pos_world</span>()
+    dist    <span class="code-op">=</span> torch.<span class="code-fn">norm</span>(ee_pos <span class="code-op">-</span> <span class="code-kw">self</span>.target_pos, dim<span class="code-op">=-</span><span class="code-num">1</span>)
+
+    <span class="code-cm"># 1. 線形距離ペナルティ（遠いほどマイナス）</span>
+    r_dist  <span class="code-op">=</span> <span class="code-kw">self</span>.cfg.reward_weight_dist <span class="code-op">*</span> (<span class="code-op">-</span>dist)
+
+    <span class="code-cm"># 2. Tanh ボーナス（目標付近で大きな正の報酬）</span>
+    r_tanh  <span class="code-op">=</span> <span class="code-kw">self</span>.cfg.reward_weight_tanh <span class="code-op">*</span> (
+        <span class="code-num">1.0</span> <span class="code-op">-</span> torch.<span class="code-fn">tanh</span>(dist <span class="code-op">/</span> <span class="code-kw">self</span>.cfg.reward_tanh_std)
+    )
+
+    <span class="code-cm"># 3. 行動ペナルティ（小さな動きを促進）</span>
+    r_action <span class="code-op">=</span> <span class="code-kw">self</span>.cfg.reward_weight_action <span class="code-op">*</span> (
+        <span class="code-op">-</span>torch.<span class="code-fn">sum</span>(<span class="code-kw">self</span>.actions <span class="code-op">**</span> <span class="code-num">2</span>, dim<span class="code-op">=-</span><span class="code-num">1</span>)
+    )
+
+    <span class="code-kw">return</span> r_dist <span class="code-op">+</span> r_tanh <span class="code-op">+</span> r_action</code></pre>
+      </div>
+
+      <!-- RL Loop Diagram -->
+      <div class="diagram-container">
+        <div class="diagram-title">強化学習ループ（データフロー）</div>
+        <div class="diagram-flow">
+          <div class="diagram-node diagram-node-primary">エージェント<br><small>PPO Policy</small></div>
+          <div class="diagram-arrow" aria-hidden="true">
+            <svg width="32" height="24" viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h28M22 6l8 6-8 6"/></svg>
+          </div>
+          <div class="diagram-node diagram-node-outline">行動 (6D)<br><small>関節角度 delta</small></div>
+          <div class="diagram-arrow" aria-hidden="true">
+            <svg width="32" height="24" viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h28M22 6l8 6-8 6"/></svg>
+          </div>
+          <div class="diagram-node diagram-node-accent">UR5 環境<br><small>Isaac Lab</small></div>
+          <div class="diagram-arrow" aria-hidden="true">
+            <svg width="32" height="24" viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h28M22 6l8 6-8 6"/></svg>
+          </div>
+          <div class="diagram-node diagram-node-outline">観測 (15D)<br><small>+ 報酬</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PPO Training ===== -->
+<section id="training" class="section" aria-labelledby="training-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Part 2 — Training</span>
+      <h2 class="section-title" id="training-title">PPO 強化学習</h2>
+      <p class="section-desc">手動制御を体験したら、次はPPOに自動学習させましょう。</p>
+    </div>
+
+    <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">学習の開始</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <span class="code-lang">Terminal</span>
+      </div>
+      <pre><code><span class="code-cm"># 64個の並列環境で学習（推奨）</span>
+python scripts/train_ppo.py \
+  <span class="code-op">--task</span> Isaac-UR5-Reach-v0 \
+  <span class="code-op">--num_envs</span> <span class="code-num">64</span>
+
+<span class="code-cm"># GPUメモリが不足する場合</span>
+python scripts/train_ppo.py \
+  <span class="code-op">--task</span> Isaac-UR5-Reach-v0 \
+  <span class="code-op">--num_envs</span> <span class="code-num">16</span>
+
+<span class="code-cm"># チェックポイントから再開</span>
+python scripts/train_ppo.py \
+  <span class="code-op">--task</span> Isaac-UR5-Reach-v0 \
+  <span class="code-op">--checkpoint</span> <span class="code-str">logs/skrl/.../best_agent.pt</span></code></pre>
+    </div>
+
+    <!-- PPO explanation -->
+    <div style="margin: var(--space-8) 0;">
+      <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">PPO アルゴリズムとは</h3>
+      <p style="color: var(--color-text-secondary); line-height: 1.8;">
+        PPO（Proximal Policy Optimization）は方策勾配法の一種で、
+        ポリシーの更新量を「クリッピング」によって制限することで学習を安定させます。
+        エージェントはロールアウト（データ収集）と最適化（ネットワーク更新）を交互に繰り返し、
+        累積報酬を最大化するポリシーを徐々に獲得します。
+        GAE（Generalized Advantage Estimation）を用いてバイアスと分散のバランスを取りながら
+        アドバンテージ関数を推定する点が特徴です。
+      </p>
+    </div>
+
+    <h3 style="font-size: var(--text-lg); font-weight: 600; margin: var(--space-8) 0 var(--space-4);">ハイパーパラメータ</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>パラメータ</th><th>デフォルト値</th><th>説明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>learning_rate</code></td><td><span class="tag tag-blue">3e-4</span></td><td>学習率 (&darr;安定 / &uarr;高速)</td></tr>
+          <tr><td><code>rollouts</code></td><td><span class="tag tag-blue">24</span></td><td>更新前のステップ数/環境</td></tr>
+          <tr><td><code>learning_epochs</code></td><td><span class="tag tag-blue">8</span></td><td>更新ごとのエポック数</td></tr>
+          <tr><td><code>discount_factor</code></td><td><span class="tag tag-blue">0.99</span></td><td>割引率 &gamma;</td></tr>
+          <tr><td><code>entropy_loss_scale</code></td><td><span class="tag tag-blue">0.005</span></td><td>探索の度合い</td></tr>
+          <tr><td><code>timesteps</code></td><td><span class="tag tag-green">150,000</span></td><td>総学習ステップ数</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Training tips -->
+    <div style="margin: var(--space-8) 0;">
+      <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">学習のヒント</h3>
+      <div class="card-grid" style="grid-template-columns: 1fr; gap: var(--space-3);">
+        <div style="display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4); background: var(--color-surface-elevated); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+          <span style="background: var(--color-primary); color: white; width: 24px; height: 24px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: var(--text-xs); font-weight: 700; flex-shrink: 0;">1</span>
+          <span style="color: var(--color-text-secondary); font-size: var(--text-sm);"><strong style="color: var(--color-text-primary);">少ない並列数から始める</strong> — まず <code>--num_envs 8</code> で動作確認し、GPUメモリに余裕があれば増やします。</span>
+        </div>
+        <div style="display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4); background: var(--color-surface-elevated); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+          <span style="background: var(--color-primary); color: white; width: 24px; height: 24px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: var(--text-xs); font-weight: 700; flex-shrink: 0;">2</span>
+          <span style="color: var(--color-text-secondary); font-size: var(--text-sm);"><strong style="color: var(--color-text-primary);">報酬曲線を監視する</strong> — TensorBoard で <code>logs/</code> ディレクトリを監視し、報酬が単調増加していることを確認します。</span>
+        </div>
+        <div style="display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4); background: var(--color-surface-elevated); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+          <span style="background: var(--color-primary); color: white; width: 24px; height: 24px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: var(--text-xs); font-weight: 700; flex-shrink: 0;">3</span>
+          <span style="color: var(--color-text-secondary); font-size: var(--text-sm);"><strong style="color: var(--color-text-primary);">安定したら並列数を増やす</strong> — 学習が安定していることを確認したら <code>--num_envs 64</code> に増やして収集効率を高めます。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-box-warn">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div><strong>GPU メモリに関する注意：</strong> GPU メモリが 8GB 未満の場合は <code>--num_envs 8</code> から始めてください。OOMエラーが出た場合は環境数を半分に減らします。環境数が多いほど1イテレーションで収集できるデータが増え学習が速くなりますが、メモリ消費も比例して増加します。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Advanced Challenges ===== -->
+<section id="advanced" class="section section-alt" aria-labelledby="adv-title">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Part 2 — Advanced</span>
+      <h2 class="section-title" id="adv-title">応用課題</h2>
+      <p class="section-desc">基礎を理解したら、以下の課題に挑戦してみましょう。</p>
+    </div>
+
+    <div class="card-grid" style="max-width: 64rem; margin: 0 auto;">
+      <div class="card">
+        <div class="card-icon card-icon-blue" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        </div>
+        <h3>Level 1: 報酬のチューニング</h3>
+        <p><code>ur5_reach_env.py</code> の報酬重みを変更して、学習行動の変化を観察します。<code>reward_tanh_std</code> を大きくすると何が起きるでしょうか？</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon card-icon-cyan" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3>Level 2: 観測空間の拡張</h3>
+        <p>末端位置 (3D) を観測に追加して、18次元にしてみましょう。エージェントの学習速度は向上しますか？</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon card-icon-green" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>Level 3: 速度制御への変更</h3>
+        <p>行動空間を位置デルタから速度指令に変更します。<code>_apply_action()</code> を修正して、<code>set_joint_velocity_target()</code> を使ってみましょう。</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon card-icon-amber" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <h3>Level 4: 障害物回避</h3>
+        <p>シーンに <code>RigidObject</code> で障害物を追加し、報酬関数に距離ベースの回避項を加えます。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Project Structure ===== -->
+<section id="project-structure" class="section" aria-labelledby="structure-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Reference</span>
+      <h2 class="section-title" id="structure-title">プロジェクト構成</h2>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <span class="code-lang">Structure</span>
+      </div>
+      <pre><code>ur5_teaching/
+<span class="code-op">├──</span> README.md                   <span class="code-cm"># プロジェクト説明</span>
+<span class="code-op">├──</span> setup.py                    <span class="code-cm"># インストール設定</span>
+<span class="code-op">│</span>
+<span class="code-op">├──</span> <span class="code-fn">ur5_lab/</span>                    <span class="code-cm"># メインパッケージ</span>
+<span class="code-op">│   ├──</span> tasks/
+<span class="code-op">│   │   └──</span> <span class="code-str">ur5_reach_env.py</span>   <span class="code-cm"># ★ 核心: 環境定義</span>
+<span class="code-op">│   └──</span> assets/
+<span class="code-op">│       ├──</span> ur5_cfg.py          <span class="code-cm"># ロボット物理設定</span>
+<span class="code-op">│       └──</span> ur5_moveit.usd      <span class="code-cm"># 3Dモデル</span>
+<span class="code-op">│</span>
+<span class="code-op">├──</span> <span class="code-fn">scripts/</span>
+<span class="code-op">│   ├──</span> <span class="code-str">manual_joint_control.py</span> <span class="code-cm"># 手動制御</span>
+<span class="code-op">│   └──</span> <span class="code-str">train_ppo.py</span>           <span class="code-cm"># RL学習</span>
+<span class="code-op">│</span>
+<span class="code-op">└──</span> <span class="code-fn">agents/</span>
+    <span class="code-op">└──</span> ppo_ur5.yaml             <span class="code-cm"># PPO ハイパーパラメータ</span></code></pre>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== Footer ===== -->
+<footer class="footer">
+  <div class="container">
+    <p>
+      UR5 Teaching Lab &mdash;
+      Built with <a href="https://isaac-sim.github.io/IsaacLab/" target="_blank" rel="noopener noreferrer">NVIDIA Isaac Lab</a>
+      &amp; <a href="https://skrl.readthedocs.io/" target="_blank" rel="noopener noreferrer">skrl</a>
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

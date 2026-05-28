@@ -1,0 +1,16 @@
+[package]
+version = "0.1.0"
+category = "isaaclab"
+title = "UR5 Teaching Lab"
+author = "RL Lab"
+maintainer = "RL Lab"
+description = "Simplified UR5 reach environment for teaching robot control and RL"
+repository = ""
+keywords = ["ur5", "reach", "isaaclab", "teaching"]
+
+[dependencies]
+"isaaclab" = {}
+"isaaclab_rl" = {}
+
+[[python.module]]
+name = "ur5_lab"
