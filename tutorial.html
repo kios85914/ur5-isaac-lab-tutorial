@@ -752,7 +752,7 @@
       </svg>
       UR5 Teaching Lab
     </a>
-    <ul class="nav-links">
+    <ul class="nav-links" id="nav-links">
       <li><a href="#overview">概要</a></li>
       <li><a href="#setup">セットアップ</a></li>
       <li><a href="#architecture">Part 1: 制御</a></li>
@@ -761,8 +761,12 @@
       <li><a href="#project-structure">構成</a></li>
       <li><a href="#advanced">応用</a></li>
     </ul>
+    <button id="lang-btn" onclick="toggleLang()" style="background:var(--color-primary);color:white;border:none;padding:var(--space-2) var(--space-4);border-radius:var(--radius-full);font-size:var(--text-sm);font-weight:600;cursor:pointer;min-height:36px;font-family:var(--font-sans);transition:background var(--transition-fast);flex-shrink:0;" onmouseover="this.style.background='var(--color-primary-dark)'" onmouseout="this.style.background='var(--color-primary)'">English</button>
   </div>
 </nav>
+
+<!-- ===== JAPANESE CONTENT ===== -->
+<div id="content-ja">
 
 <!-- ===== Hero ===== -->
 <header class="hero">
@@ -1736,6 +1740,377 @@ python scripts/train_ppo.py \
 
 </main>
 
+</div><!-- /content-ja -->
+
+<!-- ===== ENGLISH CONTENT ===== -->
+<div id="content-en" style="display:none;">
+
+<header class="hero">
+  <div class="hero-badge">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    Isaac Lab 2.2+ Compatible
+  </div>
+  <h1>UR5 Robot Arm<br><span>Control Tutorial</span></h1>
+  <p class="hero-subtitle">From manual joint input to PPO reinforcement learning,<br>learn the fundamentals of robot control step by step.</p>
+  <div class="hero-actions">
+    <a href="#setup-en" class="btn btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      Get Started
+    </a>
+    <a href="#architecture-en" class="btn btn-secondary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      Architecture
+    </a>
+  </div>
+</header>
+
+<main id="main-en">
+
+<!-- Overview -->
+<section id="overview-en" class="section" aria-labelledby="overview-en-title">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Overview</span>
+      <h2 class="section-title" id="overview-en-title">What You Will Learn</h2>
+      <p class="section-desc">Experience UR5 robot arm control on NVIDIA Isaac Lab and master the basics of reinforcement learning.</p>
+    </div>
+    <div class="card-grid" style="grid-template-columns: 1fr 1fr; max-width: 64rem; margin: 0 auto;">
+      <div class="card" style="border-top: 3px solid var(--color-primary);">
+        <h3 style="display: flex; align-items: center; gap: var(--space-3);">
+          <span style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-primary);background:var(--color-primary-100);padding:2px 10px;border-radius:var(--radius-full);">Part 1</span>
+          Simulation &amp; Control
+        </h3>
+        <p>Isaac Lab architecture, UR5 joint structure, manual joint control, end-effector tracking with FrameTransformer, inverse kinematics (IK)</p>
+      </div>
+      <div class="card" style="border-top: 3px solid var(--color-accent);">
+        <h3 style="display: flex; align-items: center; gap: var(--space-3);">
+          <span style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-accent-dark);background:rgba(6,182,212,0.12);padding:2px 10px;border-radius:var(--radius-full);">Part 2</span>
+          Reinforcement Learning
+        </h3>
+        <p>Gymnasium environment interface (DirectRLEnv), PPO training with skrl, reward function design, hyperparameter tuning</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Setup -->
+<section id="setup-en" class="section section-alt" aria-labelledby="setup-en-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Setup</span>
+      <h2 class="section-title" id="setup-en-title">Installation</h2>
+      <p class="section-desc">Set up your environment in 3 steps.</p>
+    </div>
+    <div class="timeline">
+      <div class="step">
+        <div class="step-marker"><div class="step-number">1</div><div class="step-line"></div></div>
+        <div class="step-content">
+          <h3>Prerequisites</h3>
+          <p>Ensure Isaac Sim and Isaac Lab are installed.</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Software</th><th>Minimum Version</th></tr></thead>
+            <tbody>
+              <tr><td>NVIDIA Isaac Sim</td><td>4.5+</td></tr>
+              <tr><td>Isaac Lab</td><td>2.2+</td></tr>
+              <tr><td>Python</td><td>3.10+</td></tr>
+              <tr><td>GPU</td><td>RTX 2070+</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-marker"><div class="step-number">2</div><div class="step-line"></div></div>
+        <div class="step-content">
+          <h3>Install the Package</h3>
+          <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Terminal</span></div>
+          <pre><code>conda activate isaaclab
+<span class="code-kw">cd</span> ur5_teaching
+pip install <span class="code-op">-e</span> .</code></pre></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-marker"><div class="step-number">3</div></div>
+        <div class="step-content">
+          <h3>Verify Installation</h3>
+          <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Terminal</span></div>
+          <pre><code>python <span class="code-op">-c</span> <span class="code-str">"import ur5_lab; print('OK')"</span></code></pre></div>
+          <div class="info-box info-box-tip">
+            <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div>If "OK" is printed, the environment <code>Isaac-UR5-Reach-v0</code> has been successfully registered with gymnasium.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Part 1 Divider -->
+<div class="part-divider" style="background:linear-gradient(135deg,var(--color-primary),#7c3aed);padding:var(--space-12) var(--space-6);text-align:center;color:white;">
+  <div style="font-size:var(--text-sm);font-weight:600;text-transform:uppercase;letter-spacing:0.1em;opacity:0.8;margin-bottom:var(--space-2);">Part 1</div>
+  <div style="font-size:var(--text-3xl);font-weight:800;">Simulation &amp; Robot Control</div>
+</div>
+
+<!-- Architecture -->
+<section id="architecture-en" class="section" aria-labelledby="arch-en-title">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Part 1 &mdash; Architecture</span>
+      <h2 class="section-title" id="arch-en-title">Isaac Lab Architecture</h2>
+      <p class="section-desc">Understand the layered structure of the UR5 reach environment.</p>
+    </div>
+    <div class="diagram-container">
+      <div class="diagram-title">System Architecture (4 Layers)</div>
+      <svg viewBox="0 0 600 320" style="width:100%;max-width:600px;margin:0 auto;display:block;" aria-label="Architecture diagram">
+        <defs><marker id="ah-en" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker></defs>
+        <rect x="100" y="10" width="400" height="55" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="300" y="35" text-anchor="middle" font-weight="700" font-size="14" fill="#ef4444">RL Agent (PPO Policy)</text>
+        <text x="300" y="52" text-anchor="middle" font-size="11" fill="#64748b">skrl Runner / Trainer</text>
+        <rect x="100" y="85" width="400" height="55" rx="10" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="300" y="110" text-anchor="middle" font-weight="700" font-size="14" fill="#b45309">DirectRLEnv (UR5ReachEnv)</text>
+        <text x="300" y="127" text-anchor="middle" font-size="11" fill="#64748b">obs / reward / done / reset</text>
+        <rect x="100" y="160" width="400" height="55" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5"/>
+        <text x="300" y="185" text-anchor="middle" font-weight="700" font-size="14" fill="#059669">Isaac Lab (Articulation + Sensors)</text>
+        <text x="300" y="202" text-anchor="middle" font-size="11" fill="#64748b">FrameTransformer / DifferentialIK</text>
+        <rect x="100" y="235" width="400" height="55" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+        <text x="300" y="260" text-anchor="middle" font-weight="700" font-size="14" fill="#1d4ed8">Isaac Sim / PhysX</text>
+        <text x="300" y="277" text-anchor="middle" font-size="11" fill="#64748b">GPU-accelerated physics engine</text>
+        <line x1="230" y1="65" x2="230" y2="85" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
+        <text x="222" y="78" text-anchor="end" font-size="10" fill="#64748b">action</text>
+        <line x1="370" y1="85" x2="370" y2="65" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
+        <text x="378" y="78" text-anchor="start" font-size="10" fill="#64748b">obs+reward</text>
+        <line x1="300" y1="140" x2="300" y2="160" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
+        <line x1="300" y1="215" x2="300" y2="235" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- UR5 Robot -->
+<section id="robot-en" class="section section-alt" aria-labelledby="robot-en-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Part 1 &mdash; Robot</span>
+      <h2 class="section-title" id="robot-en-title">UR5 Robot</h2>
+      <p class="section-desc">Understand the joint structure and actuator configuration.</p>
+    </div>
+    <h3 style="font-size:var(--text-lg);font-weight:600;margin-bottom:var(--space-4);">6-DOF Joint Structure</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Joint</th><th>Name</th><th>Axis</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-blue">J1</span></td><td>shoulder_pan_joint</td><td>Z</td><td>Base rotation</td></tr>
+        <tr><td><span class="tag tag-blue">J2</span></td><td>shoulder_lift_joint</td><td>Y</td><td>Shoulder lift</td></tr>
+        <tr><td><span class="tag tag-blue">J3</span></td><td>elbow_joint</td><td>Y</td><td>Elbow bend</td></tr>
+        <tr><td><span class="tag tag-cyan">J4</span></td><td>wrist_1_joint</td><td>Y</td><td>Wrist pitch</td></tr>
+        <tr><td><span class="tag tag-cyan">J5</span></td><td>wrist_2_joint</td><td>Z</td><td>Wrist yaw</td></tr>
+        <tr><td><span class="tag tag-cyan">J6</span></td><td>wrist_3_joint</td><td>Y</td><td>Wrist roll</td></tr>
+      </tbody>
+    </table></div>
+    <div class="info-box info-box-note">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div><strong>Actuator Config:</strong> Implicit PD controller with stiffness=800, damping=40. The robot base is placed at height z=1.05m (table height).</div>
+    </div>
+  </div>
+</section>
+
+<!-- Manual Control -->
+<section id="manual-en" class="section" aria-labelledby="manual-en-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Part 1 &mdash; Step 1</span>
+      <h2 class="section-title" id="manual-en-title">Manual Control</h2>
+      <p class="section-desc">Move the robot by hand to build intuition for joint space.</p>
+    </div>
+    <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Terminal</span></div>
+    <pre><code>python scripts/manual_joint_control.py <span class="code-op">--num_envs</span> <span class="code-num">1</span></code></pre></div>
+    <h3 style="font-size:var(--text-lg);font-weight:600;margin:var(--space-8) 0 var(--space-4);">Available Commands</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Command</th><th>Description</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-blue">6 numbers</span></td><td>Set joint target angles (radians)</td><td><code>-0.5 -1.0 1.5 -2.0 -1.5 0.0</code></td></tr>
+        <tr><td><span class="tag tag-green">ee X Y Z</span></td><td>Move EE to world position via IK</td><td><code>ee 0.5 0.0 1.2</code></td></tr>
+        <tr><td><span class="tag tag-green">home</span></td><td>Return to home position</td><td><code>home</code></td></tr>
+        <tr><td><span class="tag tag-cyan">random</span></td><td>Execute random motion</td><td><code>random</code></td></tr>
+        <tr><td><span class="tag tag-cyan">info</span></td><td>Display current state</td><td><code>info</code></td></tr>
+        <tr><td><span class="tag tag-blue">quit</span></td><td>Exit</td><td><code>quit</code></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- IK -->
+<section id="ik-en" class="section section-alt" aria-labelledby="ik-en-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Part 1 &mdash; Step 2</span>
+      <h2 class="section-title" id="ik-en-title">Inverse Kinematics (IK)</h2>
+      <p class="section-desc">Automatically compute joint angles from a target end-effector position (XYZ).</p>
+    </div>
+    <div class="diagram-container">
+      <div class="diagram-title">Forward Kinematics (FK) vs Inverse Kinematics (IK)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);margin-top:var(--space-4);">
+        <div style="text-align:center;">
+          <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-text-secondary);margin-bottom:var(--space-3);">FK: Forward Kinematics</div>
+          <div class="diagram-flow" style="justify-content:center;">
+            <div class="diagram-node diagram-node-primary" style="min-width:90px;font-size:var(--text-sm);">Joint Angles<br><small>6 values</small></div>
+            <div class="diagram-arrow" aria-hidden="true"><svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10h24M20 4l6 6-6 6"/></svg></div>
+            <div class="diagram-node diagram-node-accent" style="min-width:90px;font-size:var(--text-sm);">EE Position<br><small>X, Y, Z</small></div>
+          </div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-text-secondary);margin-bottom:var(--space-3);">IK: Inverse Kinematics</div>
+          <div class="diagram-flow" style="justify-content:center;">
+            <div class="diagram-node diagram-node-accent" style="min-width:90px;font-size:var(--text-sm);">EE Target<br><small>X, Y, Z</small></div>
+            <div class="diagram-arrow" aria-hidden="true"><svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10h24M20 4l6 6-6 6"/></svg></div>
+            <div class="diagram-node diagram-node-primary" style="min-width:90px;font-size:var(--text-sm);">Joint Angles<br><small>6 values</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="color:var(--color-text-secondary);line-height:1.8;margin-bottom:var(--space-4);">This environment uses Isaac Lab's <strong>DifferentialIKController</strong>, which computes joint deltas using the pseudo-inverse of the Jacobian matrix:</p>
+    <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Math &mdash; Differential IK</span></div>
+    <pre><code><span class="code-cm"># Differential IK formula</span>
+<span class="code-cm"># Δq = J† × Δx</span>
+<span class="code-cm"># q_desired = q_current + Δq</span>
+<span class="code-cm">#</span>
+<span class="code-cm"># J†  = Jacobian pseudo-inverse</span>
+<span class="code-cm"># Δx  = target_pos - current_pos (position error)</span>
+<span class="code-cm"># Δq  = joint angle delta</span></code></pre></div>
+    <h3 style="font-size:var(--text-lg);font-weight:600;margin:var(--space-8) 0 var(--space-4);">Usage</h3>
+    <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Terminal &mdash; IK Control</span></div>
+    <pre><code><span class="code-cm"># Move EE to world position (0.5, 0.0, 1.2)</span>
+> ee <span class="code-num">0.5</span> <span class="code-num">0.0</span> <span class="code-num">1.2</span>
+  → IK target: (<span class="code-num">0.500</span>, <span class="code-num">0.000</span>, <span class="code-num">1.200</span>)
+
+<span class="code-cm"># Verify with info</span>
+> info
+  End-effector position: [<span class="code-num">0.501</span>, <span class="code-num">0.002</span>, <span class="code-num">1.198</span>]
+  Distance to target: <span class="code-num">0.0031</span> m</code></pre></div>
+    <div class="info-box info-box-tip">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div><strong>Try it:</strong> Compare <code>ee X Y Z</code> with manual joint input for the same target. IK computes the answer instantly, while manual input requires trial and error. This gap is exactly what RL aims to solve.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Part 2 Divider -->
+<div class="part-divider" style="background:linear-gradient(135deg,var(--color-accent-dark),#2563eb);padding:var(--space-12) var(--space-6);text-align:center;color:white;">
+  <div style="font-size:var(--text-sm);font-weight:600;text-transform:uppercase;letter-spacing:0.1em;opacity:0.8;margin-bottom:var(--space-2);">Part 2</div>
+  <div style="font-size:var(--text-3xl);font-weight:800;">Reinforcement Learning</div>
+</div>
+
+<!-- Environment Interface -->
+<section id="env-interface-en" class="section section-alt" aria-labelledby="env-en-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Part 2 &mdash; Environment</span>
+      <h2 class="section-title" id="env-en-title">Environment Interface</h2>
+      <p class="section-desc">Understand how the RL environment is structured.</p>
+    </div>
+    <h3 style="font-size:var(--text-lg);font-weight:600;margin-bottom:var(--space-4);">Observation Space (15D)</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Dims</th><th>Content</th><th>Size</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-blue">0-5</span></td><td>Joint angles</td><td>6</td><td>Current angle of each joint (rad)</td></tr>
+        <tr><td><span class="tag tag-cyan">6-11</span></td><td>Joint velocities</td><td>6</td><td>Angular velocity of each joint (rad/s)</td></tr>
+        <tr><td><span class="tag tag-green">12-14</span></td><td>Target position</td><td>3</td><td>Target XYZ in robot base frame (m)</td></tr>
+      </tbody>
+    </table></div>
+    <h3 style="font-size:var(--text-lg);font-weight:600;margin:var(--space-8) 0 var(--space-4);">Reward Function</h3>
+    <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Python &mdash; Reward</span></div>
+    <pre><code><span class="code-cm"># 1. Linear distance penalty (farther = more negative)</span>
+r_dist <span class="code-op">=</span> weight_d <span class="code-op">*</span> (<span class="code-op">-</span>dist)
+
+<span class="code-cm"># 2. Tanh bonus (high reward near target)</span>
+r_tanh <span class="code-op">=</span> weight_t <span class="code-op">*</span> (<span class="code-num">1.0</span> <span class="code-op">-</span> <span class="code-fn">tanh</span>(dist <span class="code-op">/</span> std))
+
+<span class="code-cm"># 3. Action penalty (encourages smooth motion)</span>
+r_action <span class="code-op">=</span> weight_a <span class="code-op">*</span> <span class="code-fn">sum</span>(action<span class="code-op">**</span><span class="code-num">2</span>)
+
+reward <span class="code-op">=</span> r_dist <span class="code-op">+</span> r_tanh <span class="code-op">+</span> r_action</code></pre></div>
+  </div>
+</section>
+
+<!-- Training -->
+<section id="training-en" class="section" aria-labelledby="training-en-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Part 2 &mdash; Training</span>
+      <h2 class="section-title" id="training-en-title">PPO Training</h2>
+      <p class="section-desc">Train the robot with Proximal Policy Optimization.</p>
+    </div>
+    <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Terminal</span></div>
+    <pre><code><span class="code-cm"># 64 parallel envs (recommended)</span>
+python scripts/train_ppo.py <span class="code-op">--task</span> Isaac-UR5-Reach-v0 <span class="code-op">--num_envs</span> <span class="code-num">64</span>
+
+<span class="code-cm"># Low GPU memory</span>
+python scripts/train_ppo.py <span class="code-op">--task</span> Isaac-UR5-Reach-v0 <span class="code-op">--num_envs</span> <span class="code-num">16</span></code></pre></div>
+    <h3 style="font-size:var(--text-lg);font-weight:600;margin:var(--space-8) 0 var(--space-4);">Hyperparameters</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>learning_rate</code></td><td><span class="tag tag-blue">3e-4</span></td><td>Learning rate</td></tr>
+        <tr><td><code>rollouts</code></td><td><span class="tag tag-blue">24</span></td><td>Steps per env before update</td></tr>
+        <tr><td><code>learning_epochs</code></td><td><span class="tag tag-blue">8</span></td><td>Epochs per update</td></tr>
+        <tr><td><code>discount_factor</code></td><td><span class="tag tag-blue">0.99</span></td><td>Discount factor &gamma;</td></tr>
+        <tr><td><code>timesteps</code></td><td><span class="tag tag-green">150,000</span></td><td>Total training steps</td></tr>
+      </tbody>
+    </table></div>
+    <div class="info-box info-box-warn">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div><strong>Note:</strong> If your GPU has less than 8GB VRAM, start with <code>--num_envs 8</code>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Advanced -->
+<section id="advanced-en" class="section section-alt" aria-labelledby="adv-en-title">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Part 2 &mdash; Advanced</span>
+      <h2 class="section-title" id="adv-en-title">Advanced Challenges</h2>
+      <p class="section-desc">Push further after mastering the basics.</p>
+    </div>
+    <div class="card-grid" style="max-width:64rem;margin:0 auto;">
+      <div class="card"><div class="card-icon card-icon-blue" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></div><h3>Level 1: Reward Tuning</h3><p>Modify reward weights in <code>ur5_reach_env.py</code>. What happens when you increase <code>reward_tanh_std</code>?</p></div>
+      <div class="card"><div class="card-icon card-icon-cyan" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><h3>Level 2: Extend Observations</h3><p>Add end-effector position (3D) to observations, making it 18D. Does the agent learn faster?</p></div>
+      <div class="card"><div class="card-icon card-icon-green" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>Level 3: Velocity Control</h3><p>Change the action space from position deltas to velocity commands. Modify <code>_apply_action()</code> to use <code>set_joint_velocity_target()</code>.</p></div>
+      <div class="card"><div class="card-icon card-icon-amber" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div><h3>Level 4: Obstacle Avoidance</h3><p>Add a <code>RigidObject</code> obstacle to the scene and incorporate a distance-based avoidance term in the reward function.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Project Structure -->
+<section id="project-structure-en" class="section" aria-labelledby="structure-en-title">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Reference</span>
+      <h2 class="section-title" id="structure-en-title">Project Structure</h2>
+    </div>
+    <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Structure</span></div>
+    <pre><code>ur5_teaching/
+<span class="code-op">├──</span> README.md                   <span class="code-cm"># Project description</span>
+<span class="code-op">├──</span> setup.py                    <span class="code-cm"># Install config</span>
+<span class="code-op">│</span>
+<span class="code-op">├──</span> <span class="code-fn">ur5_lab/</span>                    <span class="code-cm"># Main package</span>
+<span class="code-op">│   ├──</span> tasks/
+<span class="code-op">│   │   └──</span> <span class="code-str">ur5_reach_env.py</span>   <span class="code-cm"># Core: env definition + IK</span>
+<span class="code-op">│   └──</span> assets/
+<span class="code-op">│       ├──</span> ur5_cfg.py          <span class="code-cm"># Robot physics config</span>
+<span class="code-op">│       └──</span> ur5_moveit.usd      <span class="code-cm"># 3D model</span>
+<span class="code-op">│</span>
+<span class="code-op">├──</span> <span class="code-fn">scripts/</span>
+<span class="code-op">│   ├──</span> <span class="code-str">manual_joint_control.py</span> <span class="code-cm"># Manual control (joint + IK)</span>
+<span class="code-op">│   └──</span> <span class="code-str">train_ppo.py</span>           <span class="code-cm"># RL training</span>
+<span class="code-op">│</span>
+<span class="code-op">└──</span> <span class="code-fn">agents/</span>
+    <span class="code-op">└──</span> ppo_ur5.yaml             <span class="code-cm"># PPO hyperparameters</span></code></pre></div>
+  </div>
+</section>
+
+</main>
+
+</div><!-- /content-en -->
+
 <!-- ===== Footer ===== -->
 <footer class="footer">
   <div class="container">
@@ -1746,6 +2121,32 @@ python scripts/train_ppo.py \
     </p>
   </div>
 </footer>
+
+<script>
+let currentLang = 'ja';
+function toggleLang() {
+  const jaEl = document.getElementById('content-ja');
+  const enEl = document.getElementById('content-en');
+  const btn = document.getElementById('lang-btn');
+  const navLinks = document.getElementById('nav-links');
+  if (currentLang === 'ja') {
+    jaEl.style.display = 'none';
+    enEl.style.display = '';
+    btn.textContent = '日本語';
+    document.documentElement.lang = 'en';
+    currentLang = 'en';
+    navLinks.innerHTML = '<li><a href="#overview-en">Overview</a></li><li><a href="#setup-en">Setup</a></li><li><a href="#architecture-en">Part 1: Control</a></li><li><a href="#ik-en">IK</a></li><li><a href="#env-interface-en">Part 2: RL</a></li><li><a href="#project-structure-en">Structure</a></li><li><a href="#advanced-en">Advanced</a></li>';
+  } else {
+    jaEl.style.display = '';
+    enEl.style.display = 'none';
+    btn.textContent = 'English';
+    document.documentElement.lang = 'ja';
+    currentLang = 'ja';
+    navLinks.innerHTML = '<li><a href="#overview">概要</a></li><li><a href="#setup">セットアップ</a></li><li><a href="#architecture">Part 1: 制御</a></li><li><a href="#ik">IK</a></li><li><a href="#env-interface">Part 2: RL</a></li><li><a href="#project-structure">構成</a></li><li><a href="#advanced">応用</a></li>';
+  }
+  window.scrollTo(0, 0);
+}
+</script>
 
 </body>
 </html>
