@@ -86,6 +86,7 @@ print("=" * 50 + "\n")
 def step(n: int = 120):
     """Run n simulation steps (default=120 = 1 second). / n ステップのシミュレーションを実行（デフォルト=120=1秒）。"""
     for _ in range(n):
+        robot.write_data_to_sim()  # Write commands to simulator / コマンドをシミュレータに書き込む
         sim.step()
         robot.update(sim_cfg.dt)
 
@@ -149,35 +150,38 @@ def move_to_ee(target_xyz: list[float], duration: float = 1.5):
     assert len(target_xyz) == 3, f"Need 3 coordinates [x, y, z], got {len(target_xyz)} / 3つの座標が必要です"
 
     target_pos_w = torch.tensor([target_xyz], device=sim.device, dtype=torch.float32)
-
-    # Get current state / 現在の状態を取得
-    robot_pos_w = robot.data.root_state_w[:, :3]
-    robot_quat_w = robot.data.root_state_w[:, 3:7]
-
-    ee_pos_w = robot.data.body_pos_w[:, ee_body_idx, :3]
-    ee_quat_w = robot.data.body_quat_w[:, ee_body_idx]
-
-    # Convert to base frame / ベースフレームに変換
-    target_pos_b, _ = math_utils.subtract_frame_transforms(robot_pos_w, robot_quat_w, target_pos_w)
-    ee_pos_b, ee_quat_b = math_utils.subtract_frame_transforms(robot_pos_w, robot_quat_w, ee_pos_w, ee_quat_w)
-
-    # Compute IK / IKを計算
-    ik_controller.set_command(target_pos_b, ee_pos=ee_pos_b, ee_quat=ee_quat_b)
-
-    jacobian_w = robot.root_physx_view.get_jacobians()[:, jacobi_body_idx, :, ARM_JOINT_IDS]
-    base_rot_matrix = math_utils.matrix_from_quat(math_utils.quat_inv(robot_quat_w))
-    jacobian_b = jacobian_w.clone()
-    jacobian_b[:, :3, :] = torch.bmm(base_rot_matrix, jacobian_w[:, :3, :])
-    jacobian_b[:, 3:, :] = torch.bmm(base_rot_matrix, jacobian_w[:, 3:, :])
-
-    joint_pos = robot.data.joint_pos[:, ARM_JOINT_IDS]
-    joint_pos_des = ik_controller.compute(ee_pos_b, ee_quat_b, jacobian_b, joint_pos)
-
-    # Apply / 適用
-    robot.set_joint_position_target(joint_pos_des, joint_ids=ARM_JOINT_IDS)
-
     n_steps = int(duration * 120)
-    step(n_steps)
+
+    # Iterative IK: recompute every few steps to converge / 反復IK：収束のため数ステップごとに再計算
+    for i in range(n_steps):
+        # Get current state / 現在の状態を取得
+        robot_pos_w = robot.data.root_state_w[:, :3]
+        robot_quat_w = robot.data.root_state_w[:, 3:7]
+
+        ee_pos_w = robot.data.body_pos_w[:, ee_body_idx, :3]
+        ee_quat_w = robot.data.body_quat_w[:, ee_body_idx]
+
+        # Convert to base frame / ベースフレームに変換
+        target_pos_b, _ = math_utils.subtract_frame_transforms(robot_pos_w, robot_quat_w, target_pos_w)
+        ee_pos_b, ee_quat_b = math_utils.subtract_frame_transforms(robot_pos_w, robot_quat_w, ee_pos_w, ee_quat_w)
+
+        # Compute IK / IKを計算
+        ik_controller.set_command(target_pos_b, ee_pos=ee_pos_b, ee_quat=ee_quat_b)
+
+        jacobian_w = robot.root_physx_view.get_jacobians()[:, jacobi_body_idx, :, ARM_JOINT_IDS]
+        base_rot_matrix = math_utils.matrix_from_quat(math_utils.quat_inv(robot_quat_w))
+        jacobian_b = jacobian_w.clone()
+        jacobian_b[:, :3, :] = torch.bmm(base_rot_matrix, jacobian_w[:, :3, :])
+        jacobian_b[:, 3:, :] = torch.bmm(base_rot_matrix, jacobian_w[:, 3:, :])
+
+        joint_pos = robot.data.joint_pos[:, ARM_JOINT_IDS]
+        joint_pos_des = ik_controller.compute(ee_pos_b, ee_quat_b, jacobian_b, joint_pos)
+
+        # Apply and step / 適用してステップ
+        robot.set_joint_position_target(joint_pos_des, joint_ids=ARM_JOINT_IDS)
+        robot.write_data_to_sim()
+        sim.step()
+        robot.update(sim_cfg.dt)
 
     state = get_state()
     print(f"  Target / 目標: {target_xyz}")
@@ -257,6 +261,7 @@ print("\nDone! Close the window to exit. / 完了！ウィンドウを閉じて�
 
 # Keep the window open / ウィンドウを開いたままにする
 while simulation_app.is_running():
+    robot.write_data_to_sim()
     sim.step()
     robot.update(sim_cfg.dt)
 

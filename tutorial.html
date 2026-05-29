@@ -756,7 +756,7 @@
       <li><a href="#overview">概要</a></li>
       <li><a href="#setup">セットアップ</a></li>
       <li><a href="#robot">ロボット</a></li>
-      <li><a href="#manual">手動制御</a></li>
+      <li><a href="#manual">制御</a></li>
       <li><a href="#ik">IK</a></li>
       <li><a href="#env-interface">環境</a></li>
       <li><a href="#training">訓練</a></li>
@@ -936,114 +936,9 @@ pip install <span class="code-op">-e</span> .</code></pre>
 <!-- ================================================================ -->
 <div class="part-divider" style="background: linear-gradient(135deg, var(--color-primary), #7c3aed); padding: var(--space-12) var(--space-6); text-align: center; color: white;">
   <div style="font-size: var(--text-sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; margin-bottom: var(--space-2);">Part 1</div>
-  <div style="font-size: var(--text-3xl); font-weight: 800;">シミュレーション＆ロボット制御</div>
-  <div style="font-size: var(--text-base); opacity: 0.85; margin-top: var(--space-3);">Simulation &amp; Robot Control</div>
+  <div style="font-size: var(--text-3xl); font-weight: 800;">ロボット制御</div>
+  <div style="font-size: var(--text-base); opacity: 0.85; margin-top: var(--space-3);">Robot Control</div>
 </div>
-
-<!-- ===== Isaac Lab Architecture ===== -->
-<section id="architecture" class="section" aria-labelledby="arch-title">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-label">Architecture</span>
-      <h2 class="section-title" id="arch-title">Isaac Lab アーキテクチャ</h2>
-      <p class="section-desc">Isaac Lab の階層構造とUR5シーンのセットアップを理解しましょう。</p>
-    </div>
-
-    <!-- Layered Architecture SVG -->
-    <div class="arch-svg-wrap">
-      <svg width="560" height="400" viewBox="0 0 560 400" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Isaac Lab 階層アーキテクチャ図">
-        <defs>
-          <marker id="arrow-up" markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
-            <polygon points="5 0, 10 7, 0 7" fill="#94a3b8"/>
-          </marker>
-          <marker id="arrow-down" markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto-start-reverse">
-            <polygon points="5 0, 10 7, 0 7" fill="#94a3b8"/>
-          </marker>
-        </defs>
-
-        <!-- Layer 1: RL Agent (top) -->
-        <rect x="60" y="20" width="440" height="72" rx="12" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
-        <text x="280" y="52" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="15" font-weight="700" fill="#ef4444">RL エージェント (PPO)</text>
-        <text x="280" y="74" text-anchor="middle" font-family="'JetBrains Mono','Consolas',monospace" font-size="12" fill="#b91c1c">skrl / PPO Policy ネットワーク</text>
-
-        <!-- Arrow: Agent → Gym (action down) -->
-        <line x1="200" y1="92" x2="200" y2="122" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-down)"/>
-        <text x="212" y="112" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">行動 (6D delta)</text>
-
-        <!-- Arrow: Gym → Agent (obs + reward up) -->
-        <line x1="340" y1="122" x2="340" y2="92" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-up)"/>
-        <text x="352" y="112" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">観測 + 報酬</text>
-
-        <!-- Layer 2: Gymnasium Environment -->
-        <rect x="60" y="128" width="440" height="72" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
-        <text x="280" y="160" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="15" font-weight="700" fill="#b45309">Gymnasium 環境 (DirectRLEnv)</text>
-        <text x="280" y="182" text-anchor="middle" font-family="'JetBrains Mono','Consolas',monospace" font-size="12" fill="#92400e">_get_obs / _get_rewards / _get_dones / _reset_idx</text>
-
-        <!-- Arrow: Gym → Isaac Lab (command down) -->
-        <line x1="200" y1="200" x2="200" y2="232" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-down)"/>
-        <text x="212" y="221" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">関節指令</text>
-
-        <!-- Arrow: Isaac Lab → Gym (state up) -->
-        <line x1="340" y1="232" x2="340" y2="200" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-up)"/>
-        <text x="352" y="221" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">センサ状態</text>
-
-        <!-- Layer 3: Isaac Lab -->
-        <rect x="60" y="238" width="440" height="72" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
-        <text x="280" y="270" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="15" font-weight="700" fill="#059669">Isaac Lab (Articulation / Sensors)</text>
-        <text x="280" y="292" text-anchor="middle" font-family="'JetBrains Mono','Consolas',monospace" font-size="12" fill="#065f46">Articulation + FrameTransformer</text>
-
-        <!-- Arrow: Isaac Lab → PhysX (simulate) -->
-        <line x1="200" y1="310" x2="200" y2="342" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-down)"/>
-        <text x="212" y="331" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">シミュレーション呼び出し</text>
-
-        <!-- Arrow: PhysX → Isaac Lab (physics result) -->
-        <line x1="340" y1="342" x2="340" y2="310" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-up)"/>
-        <text x="352" y="331" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">物理演算結果</text>
-
-        <!-- Layer 4: Isaac Sim / PhysX (bottom) -->
-        <rect x="60" y="348" width="440" height="38" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
-        <text x="280" y="372" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="14" font-weight="700" fill="#1d4ed8">Isaac Sim / PhysX  —  物理エンジン</text>
-      </svg>
-    </div>
-
-    <!-- Scene setup explanation -->
-    <div style="max-width: 48rem; margin: 0 auto;">
-      <h3 style="font-size: var(--text-xl); font-weight: 600; margin-bottom: var(--space-4);">UR5 シーン構成</h3>
-      <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-6);">
-        シミュレーション環境は <code>_setup_scene()</code> メソッドで構成されます。
-        ロボット本体、末端位置を計測するセンサ（FrameTransformer）、地面、照明の4要素から成ります。
-      </p>
-
-      <div class="code-block">
-        <div class="code-header">
-          <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
-          <span class="code-lang">Python — ur5_reach_env.py</span>
-        </div>
-        <pre><code><span class="code-kw">def</span> <span class="code-fn">_setup_scene</span>(<span class="code-kw">self</span>):
-    <span class="code-cm"># 1. UR5 ロボットを生成</span>
-    <span class="code-kw">self</span>._robot <span class="code-op">=</span> <span class="code-fn">Articulation</span>(<span class="code-kw">self</span>.cfg.robot_cfg)
-
-    <span class="code-cm"># 2. 末端エフェクタ位置センサ</span>
-    <span class="code-kw">self</span>._ee_frame <span class="code-op">=</span> <span class="code-fn">FrameTransformer</span>(<span class="code-kw">self</span>.cfg.ee_frame_cfg)
-
-    <span class="code-cm"># 3. 地面を追加</span>
-    <span class="code-fn">spawn_ground_plane</span>(prim_path<span class="code-op">=</span><span class="code-str">"/World/ground"</span>,
-                       cfg<span class="code-op">=</span><span class="code-fn">GroundPlaneCfg</span>())
-
-    <span class="code-cm"># 4. 照明を追加</span>
-    <span class="code-fn">spawn_light</span>(prim_path<span class="code-op">=</span><span class="code-str">"/World/light"</span>,
-                cfg<span class="code-op">=</span><span class="code-fn">DomeLightCfg</span>(intensity<span class="code-op">=</span><span class="code-num">2500.0</span>))
-
-    <span class="code-cm"># 5. シーンに登録</span>
-    <span class="code-kw">self</span>.scene.articulations[<span class="code-str">"robot"</span>] <span class="code-op">=</span> <span class="code-kw">self</span>._robot
-    <span class="code-kw">self</span>.scene.sensors[<span class="code-str">"ee_frame"</span>] <span class="code-op">=</span> <span class="code-kw">self</span>._ee_frame
-
-    <span class="code-cm"># 6. 並列環境のクローン生成</span>
-    <span class="code-kw">self</span>.scene.clone_environments(copy_from_source<span class="code-op">=</span><span class="code-kw">False</span>)</code></pre>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ===== UR5 Robot ===== -->
 <section id="robot" class="section section-alt" aria-labelledby="robot-title">
@@ -1480,6 +1375,111 @@ dist    <span class="code-op">=</span> torch.<span class="code-fn">norm</span>(e
   <div style="font-size: var(--text-base); opacity: 0.85; margin-top: var(--space-3);">Reinforcement Learning</div>
 </div>
 
+<!-- ===== Isaac Lab Architecture ===== -->
+<section id="architecture" class="section" aria-labelledby="arch-title">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Part 2 — Architecture</span>
+      <h2 class="section-title" id="arch-title">Isaac Lab アーキテクチャ</h2>
+      <p class="section-desc">Isaac Lab の階層構造とUR5シーンのセットアップを理解しましょう。</p>
+    </div>
+
+    <!-- Layered Architecture SVG -->
+    <div class="arch-svg-wrap">
+      <svg width="560" height="400" viewBox="0 0 560 400" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Isaac Lab 階層アーキテクチャ図">
+        <defs>
+          <marker id="arrow-up" markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
+            <polygon points="5 0, 10 7, 0 7" fill="#94a3b8"/>
+          </marker>
+          <marker id="arrow-down" markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto-start-reverse">
+            <polygon points="5 0, 10 7, 0 7" fill="#94a3b8"/>
+          </marker>
+        </defs>
+
+        <!-- Layer 1: RL Agent (top) -->
+        <rect x="60" y="20" width="440" height="72" rx="12" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
+        <text x="280" y="52" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="15" font-weight="700" fill="#ef4444">RL エージェント (PPO)</text>
+        <text x="280" y="74" text-anchor="middle" font-family="'JetBrains Mono','Consolas',monospace" font-size="12" fill="#b91c1c">skrl / PPO Policy ネットワーク</text>
+
+        <!-- Arrow: Agent → Gym (action down) -->
+        <line x1="200" y1="92" x2="200" y2="122" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-down)"/>
+        <text x="212" y="112" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">行動 (6D delta)</text>
+
+        <!-- Arrow: Gym → Agent (obs + reward up) -->
+        <line x1="340" y1="122" x2="340" y2="92" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-up)"/>
+        <text x="352" y="112" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">観測 + 報酬</text>
+
+        <!-- Layer 2: Gymnasium Environment -->
+        <rect x="60" y="128" width="440" height="72" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+        <text x="280" y="160" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="15" font-weight="700" fill="#b45309">Gymnasium 環境 (DirectRLEnv)</text>
+        <text x="280" y="182" text-anchor="middle" font-family="'JetBrains Mono','Consolas',monospace" font-size="12" fill="#92400e">_get_obs / _get_rewards / _get_dones / _reset_idx</text>
+
+        <!-- Arrow: Gym → Isaac Lab (command down) -->
+        <line x1="200" y1="200" x2="200" y2="232" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-down)"/>
+        <text x="212" y="221" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">関節指令</text>
+
+        <!-- Arrow: Isaac Lab → Gym (state up) -->
+        <line x1="340" y1="232" x2="340" y2="200" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-up)"/>
+        <text x="352" y="221" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">センサ状態</text>
+
+        <!-- Layer 3: Isaac Lab -->
+        <rect x="60" y="238" width="440" height="72" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+        <text x="280" y="270" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="15" font-weight="700" fill="#059669">Isaac Lab (Articulation / Sensors)</text>
+        <text x="280" y="292" text-anchor="middle" font-family="'JetBrains Mono','Consolas',monospace" font-size="12" fill="#065f46">Articulation + FrameTransformer</text>
+
+        <!-- Arrow: Isaac Lab → PhysX (simulate) -->
+        <line x1="200" y1="310" x2="200" y2="342" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-down)"/>
+        <text x="212" y="331" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">シミュレーション呼び出し</text>
+
+        <!-- Arrow: PhysX → Isaac Lab (physics result) -->
+        <line x1="340" y1="342" x2="340" y2="310" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-up)"/>
+        <text x="352" y="331" font-family="'Noto Sans JP','Inter',sans-serif" font-size="11" fill="#94a3b8">物理演算結果</text>
+
+        <!-- Layer 4: Isaac Sim / PhysX (bottom) -->
+        <rect x="60" y="348" width="440" height="38" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+        <text x="280" y="372" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="14" font-weight="700" fill="#1d4ed8">Isaac Sim / PhysX  —  物理エンジン</text>
+      </svg>
+    </div>
+
+    <!-- Scene setup explanation -->
+    <div style="max-width: 48rem; margin: 0 auto;">
+      <h3 style="font-size: var(--text-xl); font-weight: 600; margin-bottom: var(--space-4);">UR5 シーン構成</h3>
+      <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-6);">
+        シミュレーション環境は <code>_setup_scene()</code> メソッドで構成されます。
+        ロボット本体、末端位置を計測するセンサ（FrameTransformer）、地面、照明の4要素から成ります。
+      </p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+          <span class="code-lang">Python — ur5_reach_env.py</span>
+        </div>
+        <pre><code><span class="code-kw">def</span> <span class="code-fn">_setup_scene</span>(<span class="code-kw">self</span>):
+    <span class="code-cm"># 1. UR5 ロボットを生成</span>
+    <span class="code-kw">self</span>._robot <span class="code-op">=</span> <span class="code-fn">Articulation</span>(<span class="code-kw">self</span>.cfg.robot_cfg)
+
+    <span class="code-cm"># 2. 末端エフェクタ位置センサ</span>
+    <span class="code-kw">self</span>._ee_frame <span class="code-op">=</span> <span class="code-fn">FrameTransformer</span>(<span class="code-kw">self</span>.cfg.ee_frame_cfg)
+
+    <span class="code-cm"># 3. 地面を追加</span>
+    <span class="code-fn">spawn_ground_plane</span>(prim_path<span class="code-op">=</span><span class="code-str">"/World/ground"</span>,
+                       cfg<span class="code-op">=</span><span class="code-fn">GroundPlaneCfg</span>())
+
+    <span class="code-cm"># 4. 照明を追加</span>
+    <span class="code-fn">spawn_light</span>(prim_path<span class="code-op">=</span><span class="code-str">"/World/light"</span>,
+                cfg<span class="code-op">=</span><span class="code-fn">DomeLightCfg</span>(intensity<span class="code-op">=</span><span class="code-num">2500.0</span>))
+
+    <span class="code-cm"># 5. シーンに登録</span>
+    <span class="code-kw">self</span>.scene.articulations[<span class="code-str">"robot"</span>] <span class="code-op">=</span> <span class="code-kw">self</span>._robot
+    <span class="code-kw">self</span>.scene.sensors[<span class="code-str">"ee_frame"</span>] <span class="code-op">=</span> <span class="code-kw">self</span>._ee_frame
+
+    <span class="code-cm"># 6. 並列環境のクローン生成</span>
+    <span class="code-kw">self</span>.scene.clone_environments(copy_from_source<span class="code-op">=</span><span class="code-kw">False</span>)</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ===== Environment Interface ===== -->
 <section id="env-interface" class="section section-alt" aria-labelledby="env-title">
   <div class="container">
@@ -1765,6 +1765,53 @@ python scripts/train_ppo.py \
   </div>
 </section>
 
+<!-- ===== Appendix ===== -->
+<section id="appendix" class="section section-alt">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Appendix</span>
+      <h2 class="section-title">Isaac Lab 内部構造</h2>
+      <p class="section-desc">シミュレーションループの仕組みを理解したい方向け。</p>
+    </div>
+    <h3>シミュレーションループ</h3>
+    <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-4);">
+      Isaac Lab のシミュレーションは以下の3つのステップで1サイクルが構成されます：
+    </p>
+    <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Python — Simulation Loop</span></div>
+    <pre><code><span class="code-cm"># 1. Write commands to simulator / コマンドをシミュレータに書き込む</span>
+robot.<span class="code-fn">write_data_to_sim</span>()
+
+<span class="code-cm"># 2. Advance physics by one step / 物理を1ステップ進める</span>
+sim.<span class="code-fn">step</span>()
+
+<span class="code-cm"># 3. Update robot state from simulation / シミュレーションからロボット状態を更新</span>
+robot.<span class="code-fn">update</span>(dt)</code></pre></div>
+
+    <div class="info-box info-box-note">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div>
+        <strong>重要：</strong>
+        <code>write_data_to_sim()</code> を呼ばないと、<code>set_joint_position_target()</code> で設定した目標がシミュレーションに反映されません。
+        Gymnasium 環境（Part 2）ではこの処理が自動化されていますが、standalone スクリプト（simple_demo.py）では手動で呼ぶ必要があります。
+      </div>
+    </div>
+
+    <h3 style="margin-top: var(--space-8);">PhysX パイプライン</h3>
+    <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-4);">
+      <code>sim.step()</code> の内部では、NVIDIA PhysX エンジンが以下を実行します：
+    </p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Stage</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>1. Broad Phase</td><td>衝突候補ペアの検出（AABB）</td></tr>
+        <tr><td>2. Narrow Phase</td><td>正確な衝突判定と接触点の計算</td></tr>
+        <tr><td>3. Solver</td><td>拘束条件の解決（関節、接触、アクチュエータ）</td></tr>
+        <tr><td>4. Integration</td><td>速度と位置の更新</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
 <!-- ===== Project Structure ===== -->
 <section id="project-structure" class="section" aria-labelledby="structure-title">
   <div class="container-narrow">
@@ -1908,43 +1955,8 @@ pip install <span class="code-op">-e</span> .</code></pre></div>
 <!-- Part 1 Divider -->
 <div class="part-divider" style="background:linear-gradient(135deg,var(--color-primary),#7c3aed);padding:var(--space-12) var(--space-6);text-align:center;color:white;">
   <div style="font-size:var(--text-sm);font-weight:600;text-transform:uppercase;letter-spacing:0.1em;opacity:0.8;margin-bottom:var(--space-2);">Part 1</div>
-  <div style="font-size:var(--text-3xl);font-weight:800;">Simulation &amp; Robot Control</div>
+  <div style="font-size:var(--text-3xl);font-weight:800;">Robot Control</div>
 </div>
-
-<!-- Architecture -->
-<section id="architecture-en" class="section" aria-labelledby="arch-en-title">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-label">Part 1 &mdash; Architecture</span>
-      <h2 class="section-title" id="arch-en-title">Isaac Lab Architecture</h2>
-      <p class="section-desc">Understand the layered structure of the UR5 reach environment.</p>
-    </div>
-    <div class="diagram-container">
-      <div class="diagram-title">System Architecture (4 Layers)</div>
-      <svg viewBox="0 0 600 320" style="width:100%;max-width:600px;margin:0 auto;display:block;" aria-label="Architecture diagram">
-        <defs><marker id="ah-en" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker></defs>
-        <rect x="100" y="10" width="400" height="55" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
-        <text x="300" y="35" text-anchor="middle" font-weight="700" font-size="14" fill="#ef4444">RL Agent (PPO Policy)</text>
-        <text x="300" y="52" text-anchor="middle" font-size="11" fill="#64748b">skrl Runner / Trainer</text>
-        <rect x="100" y="85" width="400" height="55" rx="10" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
-        <text x="300" y="110" text-anchor="middle" font-weight="700" font-size="14" fill="#b45309">DirectRLEnv (UR5ReachEnv)</text>
-        <text x="300" y="127" text-anchor="middle" font-size="11" fill="#64748b">obs / reward / done / reset</text>
-        <rect x="100" y="160" width="400" height="55" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5"/>
-        <text x="300" y="185" text-anchor="middle" font-weight="700" font-size="14" fill="#059669">Isaac Lab (Articulation + Sensors)</text>
-        <text x="300" y="202" text-anchor="middle" font-size="11" fill="#64748b">Articulation + FrameTransformer</text>
-        <rect x="100" y="235" width="400" height="55" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
-        <text x="300" y="260" text-anchor="middle" font-weight="700" font-size="14" fill="#1d4ed8">Isaac Sim / PhysX</text>
-        <text x="300" y="277" text-anchor="middle" font-size="11" fill="#64748b">GPU-accelerated physics engine</text>
-        <line x1="230" y1="65" x2="230" y2="85" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
-        <text x="222" y="78" text-anchor="end" font-size="10" fill="#64748b">action</text>
-        <line x1="370" y1="85" x2="370" y2="65" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
-        <text x="378" y="78" text-anchor="start" font-size="10" fill="#64748b">obs+reward</text>
-        <line x1="300" y1="140" x2="300" y2="160" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
-        <line x1="300" y1="215" x2="300" y2="235" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
-      </svg>
-    </div>
-  </div>
-</section>
 
 <!-- UR5 Robot -->
 <section id="robot-en" class="section section-alt" aria-labelledby="robot-en-title">
@@ -2099,6 +2111,41 @@ targets <span class="code-op">=</span> [
   <div style="font-size:var(--text-3xl);font-weight:800;">Reinforcement Learning</div>
 </div>
 
+<!-- Architecture -->
+<section id="architecture-en" class="section" aria-labelledby="arch-en-title">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Part 2 &mdash; Architecture</span>
+      <h2 class="section-title" id="arch-en-title">Isaac Lab Architecture</h2>
+      <p class="section-desc">Understand the layered structure of the UR5 reach environment.</p>
+    </div>
+    <div class="diagram-container">
+      <div class="diagram-title">System Architecture (4 Layers)</div>
+      <svg viewBox="0 0 600 320" style="width:100%;max-width:600px;margin:0 auto;display:block;" aria-label="Architecture diagram">
+        <defs><marker id="ah-en" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker></defs>
+        <rect x="100" y="10" width="400" height="55" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="300" y="35" text-anchor="middle" font-weight="700" font-size="14" fill="#ef4444">RL Agent (PPO Policy)</text>
+        <text x="300" y="52" text-anchor="middle" font-size="11" fill="#64748b">skrl Runner / Trainer</text>
+        <rect x="100" y="85" width="400" height="55" rx="10" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="300" y="110" text-anchor="middle" font-weight="700" font-size="14" fill="#b45309">DirectRLEnv (UR5ReachEnv)</text>
+        <text x="300" y="127" text-anchor="middle" font-size="11" fill="#64748b">obs / reward / done / reset</text>
+        <rect x="100" y="160" width="400" height="55" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5"/>
+        <text x="300" y="185" text-anchor="middle" font-weight="700" font-size="14" fill="#059669">Isaac Lab (Articulation + Sensors)</text>
+        <text x="300" y="202" text-anchor="middle" font-size="11" fill="#64748b">Articulation + FrameTransformer</text>
+        <rect x="100" y="235" width="400" height="55" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+        <text x="300" y="260" text-anchor="middle" font-weight="700" font-size="14" fill="#1d4ed8">Isaac Sim / PhysX</text>
+        <text x="300" y="277" text-anchor="middle" font-size="11" fill="#64748b">GPU-accelerated physics engine</text>
+        <line x1="230" y1="65" x2="230" y2="85" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
+        <text x="222" y="78" text-anchor="end" font-size="10" fill="#64748b">action</text>
+        <line x1="370" y1="85" x2="370" y2="65" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
+        <text x="378" y="78" text-anchor="start" font-size="10" fill="#64748b">obs+reward</text>
+        <line x1="300" y1="140" x2="300" y2="160" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
+        <line x1="300" y1="215" x2="300" y2="235" stroke="#64748b" stroke-width="1.5" marker-end="url(#ah-en)"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
 <!-- Environment Interface -->
 <section id="env-interface-en" class="section section-alt" aria-labelledby="env-en-title">
   <div class="container-narrow">
@@ -2188,6 +2235,52 @@ python scripts/train_ppo.py <span class="code-op">--task</span> Isaac-UR5-Reach-
   </div>
 </section>
 
+<!-- Appendix -->
+<section id="appendix-en" class="section section-alt">
+  <div class="container-narrow">
+    <div class="section-header">
+      <span class="section-label">Appendix</span>
+      <h2 class="section-title">Isaac Lab Internals</h2>
+      <p class="section-desc">For those who want to understand the simulation loop.</p>
+    </div>
+    <h3>Simulation Loop</h3>
+    <p style="color:var(--color-text-secondary);line-height:1.8;margin-bottom:var(--space-4);">
+      Each cycle of the Isaac Lab simulation consists of three steps:
+    </p>
+    <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Python — Simulation Loop</span></div>
+    <pre><code><span class="code-cm"># 1. Write commands to simulator</span>
+robot.<span class="code-fn">write_data_to_sim</span>()
+
+<span class="code-cm"># 2. Advance physics by one step</span>
+sim.<span class="code-fn">step</span>()
+
+<span class="code-cm"># 3. Update robot state from simulation</span>
+robot.<span class="code-fn">update</span>(dt)</code></pre></div>
+
+    <div class="info-box info-box-note">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div>
+        <strong>Important:</strong>
+        <code>write_data_to_sim()</code> must be called manually in standalone scripts (simple_demo.py). Without it, targets set via <code>set_joint_position_target()</code> will not be applied to the simulation. In Gymnasium environments (Part 2), this is handled automatically.
+      </div>
+    </div>
+
+    <h3 style="margin-top:var(--space-8);">PhysX Pipeline</h3>
+    <p style="color:var(--color-text-secondary);line-height:1.8;margin-bottom:var(--space-4);">
+      Inside <code>sim.step()</code>, the NVIDIA PhysX engine executes the following stages:
+    </p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Stage</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>1. Broad Phase</td><td>Detect collision candidate pairs (AABB)</td></tr>
+        <tr><td>2. Narrow Phase</td><td>Precise collision detection and contact point computation</td></tr>
+        <tr><td>3. Solver</td><td>Resolve constraints (joints, contacts, actuators)</td></tr>
+        <tr><td>4. Integration</td><td>Update velocities and positions</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
 <!-- Project Structure -->
 <section id="project-structure-en" class="section" aria-labelledby="structure-en-title">
   <div class="container-narrow">
@@ -2244,14 +2337,14 @@ function toggleLang() {
     btn.textContent = '日本語';
     document.documentElement.lang = 'en';
     currentLang = 'en';
-    navLinks.innerHTML = '<li><a href="#overview-en">Overview</a></li><li><a href="#setup-en">Setup</a></li><li><a href="#robot-en">Robot</a></li><li><a href="#manual-en">Manual</a></li><li><a href="#ik-en">IK</a></li><li><a href="#env-interface-en">Environment</a></li><li><a href="#training-en">Training</a></li><li><a href="#advanced-en">Advanced</a></li>';
+    navLinks.innerHTML = '<li><a href="#overview-en">Overview</a></li><li><a href="#setup-en">Setup</a></li><li><a href="#robot-en">Robot</a></li><li><a href="#manual-en">Control</a></li><li><a href="#ik-en">IK</a></li><li><a href="#env-interface-en">Environment</a></li><li><a href="#training-en">Training</a></li><li><a href="#advanced-en">Advanced</a></li>';
   } else {
     jaEl.style.display = '';
     enEl.style.display = 'none';
     btn.textContent = 'English';
     document.documentElement.lang = 'ja';
     currentLang = 'ja';
-    navLinks.innerHTML = '<li><a href="#overview">概要</a></li><li><a href="#setup">セットアップ</a></li><li><a href="#robot">ロボット</a></li><li><a href="#manual">手動制御</a></li><li><a href="#ik">IK</a></li><li><a href="#env-interface">環境</a></li><li><a href="#training">訓練</a></li><li><a href="#advanced">応用</a></li>';
+    navLinks.innerHTML = '<li><a href="#overview">概要</a></li><li><a href="#setup">セットアップ</a></li><li><a href="#robot">ロボット</a></li><li><a href="#manual">制御</a></li><li><a href="#ik">IK</a></li><li><a href="#env-interface">環境</a></li><li><a href="#training">訓練</a></li><li><a href="#advanced">応用</a></li>';
   }
   window.scrollTo(0, 0);
 }
