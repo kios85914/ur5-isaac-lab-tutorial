@@ -203,33 +203,49 @@ print("Initial state / 初期状態:")
 print(get_state())
 print()
 
-# --- Example 1: Joint control / 関節制御の例 ---
-print("--- Example 1: Joint Control / 関節制御 ---")
+# --- Example 1: Joint control -- arms up / 関節制御 -- アームを上に ---
+print("=" * 50)
+print("Example 1: Joint Control -- Arms Up / 関節制御 -- アームを上に")
+print("=" * 50)
+move_joints([0.0, -1.57, 0.0, -1.57, 0.0, 0.0])
+print()
+
+# --- Example 2: Joint control -- reach forward / 関節制御 -- 前方に伸ばす ---
+print("=" * 50)
+print("Example 2: Joint Control -- Reach Forward / 関節制御 -- 前方に伸ばす")
+print("=" * 50)
+move_joints([-0.2, -0.3, 0.8, -2.1, -1.57, 0.5])
+print()
+
+# --- Example 3: Joint control -- side reach / 関節制御 -- 横に伸ばす ---
+print("=" * 50)
+print("Example 3: Joint Control -- Side Reach / 関節制御 -- 横に伸ばす")
+print("=" * 50)
+move_joints([1.2, -1.0, 1.2, -1.8, -1.57, -0.3])
+print()
+
+# --- Example 4: IK control -- move EE to a point / IK制御 -- 末端を指定位置へ ---
+print("=" * 50)
+print("Example 4: IK Control -- Target Position / IK制御 -- 目標位置")
+print("=" * 50)
 home()
+move_to_ee([0.4, 0.3, 1.4])    # forward-right, 35cm above table / 前方右、テーブルから35cm上
 print()
 
-# --- Example 2: Move one joint / 1つの関節を動かす ---
-print("--- Example 2: Move J1 only / J1のみ動かす ---")
-move_joints([-1.5, -0.658, 1.602, -2.585, -1.606, -1.641])
-print()
-
-# --- Example 3: IK control / IK制御の例 ---
-print("--- Example 3: IK Control / IK制御 ---")
-home()
-move_to_ee([0.5, 0.0, 1.3])    # 25cm above table / テーブルから25cm上
-print()
-
-# --- Example 4: Move to multiple positions / 複数位置に移動 ---
-print("--- Example 4: Multiple targets / 複数目標 ---")
-targets = [
-    [0.5, 0.2, 1.3],   # right / 右
-    [0.5, -0.2, 1.3],  # left / 左
-    [0.3, 0.0, 1.5],   # high / 上方
-    [0.6, 0.0, 1.1],   # low / 下方
+# --- Example 5: IK control -- trace a path / IK制御 -- 軌跡を描く ---
+print("=" * 50)
+print("Example 5: IK Control -- Trace a Square / IK制御 -- 四角形の軌跡")
+print("=" * 50)
+square_targets = [
+    [0.4, -0.2, 1.4],   # front-left / 前方左
+    [0.4, -0.2, 1.1],   # front-left-low / 前方左下
+    [0.4,  0.2, 1.1],   # front-right-low / 前方右下
+    [0.4,  0.2, 1.4],   # front-right-high / 前方右上
+    [0.4, -0.2, 1.4],   # back to start / 開始点に戻る
 ]
-for i, t in enumerate(targets):
-    print(f"  Target {i+1}: {t}")
-    move_to_ee(t, duration=1.0)
+for i, t in enumerate(square_targets):
+    print(f"  Point {i+1}/5: {t}")
+    move_to_ee(t, duration=0.8)
 print()
 
 # --- Your turn! Add your code below / あなたの番！以下にコードを追加 ---
