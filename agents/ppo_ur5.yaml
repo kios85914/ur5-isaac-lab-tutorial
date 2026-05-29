@@ -52,15 +52,15 @@ agent:
   mini_batches: 4           # 分 4 個 mini-batch
 
   discount_factor: 0.99     # 折扣因子 γ
-  lambda: 0.95              # GAE λ
+  gae_lambda: 0.95          # GAE λ
   learning_rate: 3.0e-04    # 學習率
   learning_rate_scheduler: KLAdaptiveLR
   learning_rate_scheduler_kwargs:
     kl_threshold: 0.008
 
-  # 觀測和值的標準化
-  state_preprocessor: RunningStandardScaler
-  state_preprocessor_kwargs: null
+  # Observation and value preprocessing / 觀測和值の標準化
+  observation_preprocessor: RunningStandardScaler
+  observation_preprocessor_kwargs: null
   value_preprocessor: RunningStandardScaler
   value_preprocessor_kwargs: null
 
@@ -68,12 +68,10 @@ agent:
   learning_starts: 0
   grad_norm_clip: 1.0       # 梯度裁剪
   ratio_clip: 0.2           # PPO clip 範圍
-  value_clip: 0.2
-  clip_predicted_values: True
+  value_clip: 0.2           # Value clip (>0 enables clipping) / 値クリップ（>0で有効）
   entropy_loss_scale: 0.005  # 鼓勵探索
   value_loss_scale: 1.0
   kl_threshold: 0.008
-  rewards_shaper: 1.0
   time_limit_bootstrap: False
 
   experiment:

@@ -63,9 +63,6 @@ class UR5ReachEnvCfg(DirectRLEnvCfg):
 
     # --- Observation and action spaces / 観測空間と行動空間 ---
     #  obs = joint_pos(6) + joint_vel(6) + target_pos(3) = 15
-    num_observations: int = 15
-    num_actions: int = 6
-
     observation_space = gym.spaces.Box(low=-float("inf"), high=float("inf"), shape=(15,))
     action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(6,))
     state_space = 0
