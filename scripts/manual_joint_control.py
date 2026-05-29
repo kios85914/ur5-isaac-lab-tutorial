@@ -18,6 +18,9 @@ Example / 例：
 
 from __future__ import annotations
 
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 import argparse
 import torch
 import threading
@@ -120,6 +123,8 @@ def main():
     env_cfg = parse_env_cfg("Isaac-UR5-Reach-v0", num_envs=args_cli.num_envs, use_fabric=True)
     env = gym.make("Isaac-UR5-Reach-v0", cfg=env_cfg, render_mode=None)
     unwrapped = env.unwrapped
+    # Disable target marker in manual mode (no RL target needed) / 手動モードでは目標マーカーを無効化（RL目標は不要）
+    unwrapped.set_debug_vis(False)
     print(f"[INFO] Environment created / 環境構築成功 | Observation space / 観測空間: {env.observation_space} | Action space / 行動空間: {env.action_space}")
 
     obs, info = env.reset()
@@ -181,12 +186,10 @@ def main():
 
             obs, reward, terminated, truncated, info = env.step(action)
 
-            # Print brief info every 200 steps / 200 ステップごとに簡易情報を表示
-            if step % 200 == 0 and step > 0:
-                joints = unwrapped.get_joint_positions()[0]
+            # Print step counter periodically (no reward to avoid confusion with training) / ステップカウンタを定期的に表示（訓練と混同しないように報酬は表示しない）
+            if step % 1000 == 0 and step > 0:
                 ee_pos = unwrapped.get_ee_pos_world()[0]
-                print(f"  [Step {step}] EE=({ee_pos[0]:.3f}, {ee_pos[1]:.3f}, {ee_pos[2]:.3f})"
-                      f" | reward={reward.mean().item():.3f}")
+                print(f"  [Step {step}] EE=({ee_pos[0]:.3f}, {ee_pos[1]:.3f}, {ee_pos[2]:.3f}) -- type 'info' for details / 詳細は 'info' を入力")
 
             step += 1
 

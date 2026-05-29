@@ -16,8 +16,10 @@ Usage / 使用方法：
 
 from __future__ import annotations
 
-import argparse
 import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+import argparse
 import sys
 import random
 from datetime import datetime

@@ -755,10 +755,11 @@
     <ul class="nav-links" id="nav-links">
       <li><a href="#overview">概要</a></li>
       <li><a href="#setup">セットアップ</a></li>
-      <li><a href="#architecture">Part 1: 制御</a></li>
+      <li><a href="#robot">ロボット</a></li>
+      <li><a href="#manual">手動制御</a></li>
       <li><a href="#ik">IK</a></li>
-      <li><a href="#env-interface">Part 2: RL</a></li>
-      <li><a href="#project-structure">構成</a></li>
+      <li><a href="#env-interface">環境</a></li>
+      <li><a href="#training">訓練</a></li>
       <li><a href="#advanced">応用</a></li>
     </ul>
     <button id="lang-btn" onclick="toggleLang()" style="background:var(--color-primary);color:white;border:none;padding:var(--space-2) var(--space-4);border-radius:var(--radius-full);font-size:var(--text-sm);font-weight:600;cursor:pointer;min-height:36px;font-family:var(--font-sans);transition:background var(--transition-fast);flex-shrink:0;" onmouseover="this.style.background='var(--color-primary-dark)'" onmouseout="this.style.background='var(--color-primary)'">English</button>
@@ -989,7 +990,7 @@ pip install <span class="code-op">-e</span> .</code></pre>
         <!-- Layer 3: Isaac Lab -->
         <rect x="60" y="238" width="440" height="72" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
         <text x="280" y="270" text-anchor="middle" font-family="'Noto Sans JP','Inter',sans-serif" font-size="15" font-weight="700" fill="#059669">Isaac Lab (Articulation / Sensors)</text>
-        <text x="280" y="292" text-anchor="middle" font-family="'JetBrains Mono','Consolas',monospace" font-size="12" fill="#065f46">Robot + FrameTransformer + Ground + Light</text>
+        <text x="280" y="292" text-anchor="middle" font-family="'JetBrains Mono','Consolas',monospace" font-size="12" fill="#065f46">Articulation + FrameTransformer</text>
 
         <!-- Arrow: Isaac Lab → PhysX (simulate) -->
         <line x1="200" y1="310" x2="200" y2="342" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-down)"/>
@@ -1020,10 +1021,10 @@ pip install <span class="code-op">-e</span> .</code></pre>
         </div>
         <pre><code><span class="code-kw">def</span> <span class="code-fn">_setup_scene</span>(<span class="code-kw">self</span>):
     <span class="code-cm"># 1. UR5 ロボットを生成</span>
-    <span class="code-kw">self</span>.robot <span class="code-op">=</span> <span class="code-fn">Articulation</span>(<span class="code-kw">self</span>.cfg.robot_cfg)
+    <span class="code-kw">self</span>._robot <span class="code-op">=</span> <span class="code-fn">Articulation</span>(<span class="code-kw">self</span>.cfg.robot_cfg)
 
     <span class="code-cm"># 2. 末端エフェクタ位置センサ</span>
-    <span class="code-kw">self</span>.ee_frame <span class="code-op">=</span> <span class="code-fn">FrameTransformer</span>(<span class="code-kw">self</span>.cfg.ee_frame_cfg)
+    <span class="code-kw">self</span>._ee_frame <span class="code-op">=</span> <span class="code-fn">FrameTransformer</span>(<span class="code-kw">self</span>.cfg.ee_frame_cfg)
 
     <span class="code-cm"># 3. 地面を追加</span>
     <span class="code-fn">spawn_ground_plane</span>(prim_path<span class="code-op">=</span><span class="code-str">"/World/ground"</span>,
@@ -1031,11 +1032,11 @@ pip install <span class="code-op">-e</span> .</code></pre>
 
     <span class="code-cm"># 4. 照明を追加</span>
     <span class="code-fn">spawn_light</span>(prim_path<span class="code-op">=</span><span class="code-str">"/World/light"</span>,
-                cfg<span class="code-op">=</span><span class="code-fn">DomeLightCfg</span>(intensity<span class="code-op">=</span><span class="code-num">3000.0</span>))
+                cfg<span class="code-op">=</span><span class="code-fn">DomeLightCfg</span>(intensity<span class="code-op">=</span><span class="code-num">2500.0</span>))
 
     <span class="code-cm"># 5. シーンに登録</span>
-    <span class="code-kw">self</span>.scene.articulations[<span class="code-str">"robot"</span>] <span class="code-op">=</span> <span class="code-kw">self</span>.robot
-    <span class="code-kw">self</span>.scene.sensors[<span class="code-str">"ee_frame"</span>] <span class="code-op">=</span> <span class="code-kw">self</span>.ee_frame
+    <span class="code-kw">self</span>.scene.articulations[<span class="code-str">"robot"</span>] <span class="code-op">=</span> <span class="code-kw">self</span>._robot
+    <span class="code-kw">self</span>.scene.sensors[<span class="code-str">"ee_frame"</span>] <span class="code-op">=</span> <span class="code-kw">self</span>._ee_frame
 
     <span class="code-cm"># 6. 並列環境のクローン生成</span>
     <span class="code-kw">self</span>.scene.clone_environments(copy_from_source<span class="code-op">=</span><span class="code-kw">False</span>)</code></pre>
@@ -1150,9 +1151,13 @@ pip install <span class="code-op">-e</span> .</code></pre>
     <div class="info-box info-box-note">
       <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
       <div>
-        <strong>ホームポジション：</strong>
-        J1=0.0, J2=-90°, J3=+90°, J4=-90°, J5=-90°, J6=0.0 rad。
-        この姿勢ではアームが垂直に上を向き、末端位置は概ねロボットベース真上に来ます。
+        <strong>ホームポジション（実際の値）：</strong>
+        shoulder_pan: -0.568 rad (-32.5°)、
+        shoulder_lift: -0.658 rad (-37.7°)、
+        elbow: 1.602 rad (91.8°)、
+        wrist_1: -2.585 rad (-148.1°)、
+        wrist_2: -1.606 rad (-92.0°)、
+        wrist_3: -1.641 rad (-94.0°)。
         stiffness=800, damping=40 は安定したPD制御に適した値です。
       </div>
     </div>
@@ -1218,6 +1223,20 @@ pip install <span class="code-op">-e</span> .</code></pre>
       </table>
     </div>
 
+    <div class="info-box info-box-tip" style="margin-top: var(--space-6);">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div>
+        <strong>はじめてのステップ：</strong>
+        <ol style="margin-top: var(--space-2); margin-left: var(--space-4); line-height: 2;">
+          <li>スクリプトを起動したら、まず <code>info</code> と入力して現在の状態を確認しましょう</li>
+          <li><code>home</code> と入力してホームポジションに戻します</li>
+          <li>1つの関節だけ変えてみましょう: <code>-1.0 -0.658 1.602 -2.585 -1.606 -1.641</code>（J1だけ変更）</li>
+          <li><code>info</code> で末端位置がどう変わったか確認します</li>
+          <li><code>ee 0.5 0.0 1.3</code> と入力してIK制御を試してみましょう</li>
+        </ol>
+      </div>
+    </div>
+
     <!-- Subsection: EE Position -->
     <h3 style="font-size: var(--text-xl); font-weight: 600; margin: var(--space-10) 0 var(--space-4);">末端エフェクタ位置を理解する</h3>
     <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-6);">
@@ -1251,12 +1270,12 @@ pip install <span class="code-op">-e</span> .</code></pre>
       <pre><code><span class="code-cm"># 末端エフェクタのワールド座標位置を取得</span>
 <span class="code-kw">def</span> <span class="code-fn">get_ee_pos_world</span>(<span class="code-kw">self</span>) <span class="code-op">-&gt;</span> torch.Tensor:
     <span class="code-cm"># shape: (num_envs, 3)  [x, y, z]</span>
-    <span class="code-kw">return</span> <span class="code-kw">self</span>.ee_frame.data.target_pos_w[..., <span class="code-num">0</span>, :]
+    <span class="code-kw">return</span> <span class="code-kw">self</span>._ee_frame.data.target_pos_w[..., <span class="code-num">0</span>, :]
 
 <span class="code-cm"># 現在の全関節角度を取得</span>
 <span class="code-kw">def</span> <span class="code-fn">get_joint_positions</span>(<span class="code-kw">self</span>) <span class="code-op">-&gt;</span> torch.Tensor:
     <span class="code-cm"># shape: (num_envs, 6)  各関節の角度 (rad)</span>
-    <span class="code-kw">return</span> <span class="code-kw">self</span>.robot.data.joint_pos
+    <span class="code-kw">return</span> <span class="code-kw">self</span>._robot.data.joint_pos
 
 <span class="code-cm"># 目標位置との距離を計算</span>
 ee_pos  <span class="code-op">=</span> <span class="code-fn">get_ee_pos_world</span>()            <span class="code-cm"># (N, 3)</span>
@@ -1359,6 +1378,17 @@ dist    <span class="code-op">=</span> torch.<span class="code-fn">norm</span>(e
   Distance to target: <span class="code-num">0.0031</span> m</code></pre>
     </div>
 
+    <div class="info-box info-box-warn" style="margin-top: var(--space-6);">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div>
+        <strong>注意：座標系について</strong>
+        <p style="margin-top: var(--space-2);"><code>ee X Y Z</code> で指定する座標はワールド座標系です。<br>
+        ロボットのベースは z=1.05m の高さに設置されているため、<br>
+        z=1.05 が約テーブル面の高さになります。</p>
+        <p style="margin-top: var(--space-2);">例: <code>ee 0.5 0.0 1.3</code> → テーブル面から約25cm上</p>
+      </div>
+    </div>
+
     <h3 style="font-size: var(--text-lg); font-weight: 600; margin: var(--space-8) 0 var(--space-4);">内部実装</h3>
     <div class="code-block">
       <div class="code-header">
@@ -1375,15 +1405,16 @@ dist    <span class="code-op">=</span> torch.<span class="code-fn">norm</span>(e
         robot_pos_w, robot_quat_w, ee_pos_w, ee_quat_w)
 
     <span class="code-cm"># 3. IK コントローラに目標を設定</span>
-    <span class="code-kw">self</span>.ik_controller.<span class="code-fn">set_command</span>(target_pos_b,
+    <span class="code-kw">self</span>._ik_controller.<span class="code-fn">set_command</span>(target_pos_b,
         ee_pos<span class="code-op">=</span>ee_pos_b, ee_quat<span class="code-op">=</span>ee_quat_b)
 
     <span class="code-cm"># 4. PhysX からヤコビアンを取得しベース座標に変換</span>
     jacobian <span class="code-op">=</span> robot.root_physx_view.<span class="code-fn">get_jacobians</span>()
-    jacobian_b <span class="code-op">=</span> <span class="code-fn">rotate_to_base_frame</span>(jacobian)
+    rot_mat <span class="code-op">=</span> <span class="code-fn">matrix_from_quat</span>(robot_quat_w)
+    jacobian_b <span class="code-op">=</span> torch.<span class="code-fn">bmm</span>(rot_mat.<span class="code-fn">transpose</span>(<span class="code-num">1</span>, <span class="code-num">2</span>), jacobian[..., :<span class="code-num">3</span>, :])
 
     <span class="code-cm"># 5. IK を解いて目標関節角度を計算</span>
-    joint_pos_des <span class="code-op">=</span> <span class="code-kw">self</span>.ik_controller.<span class="code-fn">compute</span>(
+    joint_pos_des <span class="code-op">=</span> <span class="code-kw">self</span>._ik_controller.<span class="code-fn">compute</span>(
         ee_pos_b, ee_quat_b, jacobian_b, joint_pos)
 
     <span class="code-kw">return</span> joint_pos_des  <span class="code-cm"># shape: (N, 6)</span></code></pre>
@@ -1409,6 +1440,23 @@ dist    <span class="code-op">=</span> torch.<span class="code-fn">norm</span>(e
     </div>
   </div>
 </section>
+
+<div style="max-width: 48rem; margin: 0 auto var(--space-8); padding: 0 var(--space-6);">
+  <div class="info-box info-box-note">
+    <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <div>
+      <strong>なぜ強化学習が必要なのか？</strong>
+      <p style="margin-top: var(--space-2);">IKは既知の環境で正確に動作しますが、以下の状況では限界があります：</p>
+      <ul style="margin: var(--space-2) 0 var(--space-2) var(--space-4); line-height: 2;">
+        <li>障害物がある環境での経路計画</li>
+        <li>外乱やモデル誤差への適応</li>
+        <li>複雑な目標（姿勢制御、力制御など）</li>
+        <li>未知の動力学への対応</li>
+      </ul>
+      <p>RLはこれらの課題を試行錯誤から学習することで解決します。</p>
+    </div>
+  </div>
+</div>
 
 <!-- ================================================================ -->
 <!-- PART 2 DIVIDER -->
@@ -1507,13 +1555,13 @@ dist    <span class="code-op">=</span> torch.<span class="code-fn">norm</span>(e
         </div>
         <pre><code><span class="code-kw">def</span> <span class="code-fn">_apply_action</span>(<span class="code-kw">self</span>):
     <span class="code-cm"># エージェントの出力: delta 関節角度 (num_envs, 6)</span>
-    delta <span class="code-op">=</span> <span class="code-kw">self</span>.action_manager.action <span class="code-op">*</span> <span class="code-kw">self</span>.cfg.action_scale
+    delta <span class="code-op">=</span> <span class="code-kw">self</span>._actions <span class="code-op">*</span> <span class="code-kw">self</span>.cfg.action_scale
 
     <span class="code-cm"># 現在角度 + delta = 新しい目標角度</span>
-    target <span class="code-op">=</span> <span class="code-kw">self</span>.robot.data.joint_pos <span class="code-op">+</span> delta
+    target <span class="code-op">=</span> <span class="code-kw">self</span>._robot.data.joint_pos <span class="code-op">+</span> delta
 
     <span class="code-cm"># PD コントローラへ目標角度を送信</span>
-    <span class="code-kw">self</span>.robot.<span class="code-fn">set_joint_position_target</span>(target)</code></pre>
+    <span class="code-kw">self</span>._robot.<span class="code-fn">set_joint_position_target</span>(target)</code></pre>
       </div>
     </div>
 
@@ -1531,19 +1579,19 @@ dist    <span class="code-op">=</span> torch.<span class="code-fn">norm</span>(e
         </div>
         <pre><code><span class="code-kw">def</span> <span class="code-fn">_get_rewards</span>(<span class="code-kw">self</span>) <span class="code-op">-&gt;</span> torch.Tensor:
     ee_pos  <span class="code-op">=</span> <span class="code-kw">self</span>.<span class="code-fn">get_ee_pos_world</span>()
-    dist    <span class="code-op">=</span> torch.<span class="code-fn">norm</span>(ee_pos <span class="code-op">-</span> <span class="code-kw">self</span>.target_pos, dim<span class="code-op">=-</span><span class="code-num">1</span>)
+    dist    <span class="code-op">=</span> torch.<span class="code-fn">norm</span>(ee_pos <span class="code-op">-</span> <span class="code-kw">self</span>._target_pos_b, dim<span class="code-op">=-</span><span class="code-num">1</span>)
 
     <span class="code-cm"># 1. 線形距離ペナルティ（遠いほどマイナス）</span>
-    r_dist  <span class="code-op">=</span> <span class="code-kw">self</span>.cfg.reward_weight_dist <span class="code-op">*</span> (<span class="code-op">-</span>dist)
+    r_dist  <span class="code-op">=</span> <span class="code-kw">self</span>.cfg.reward_distance_weight <span class="code-op">*</span> (<span class="code-op">-</span>dist)
 
     <span class="code-cm"># 2. Tanh ボーナス（目標付近で大きな正の報酬）</span>
-    r_tanh  <span class="code-op">=</span> <span class="code-kw">self</span>.cfg.reward_weight_tanh <span class="code-op">*</span> (
+    r_tanh  <span class="code-op">=</span> <span class="code-kw">self</span>.cfg.reward_tanh_weight <span class="code-op">*</span> (
         <span class="code-num">1.0</span> <span class="code-op">-</span> torch.<span class="code-fn">tanh</span>(dist <span class="code-op">/</span> <span class="code-kw">self</span>.cfg.reward_tanh_std)
     )
 
     <span class="code-cm"># 3. 行動ペナルティ（小さな動きを促進）</span>
-    r_action <span class="code-op">=</span> <span class="code-kw">self</span>.cfg.reward_weight_action <span class="code-op">*</span> (
-        <span class="code-op">-</span>torch.<span class="code-fn">sum</span>(<span class="code-kw">self</span>.actions <span class="code-op">**</span> <span class="code-num">2</span>, dim<span class="code-op">=-</span><span class="code-num">1</span>)
+    r_action <span class="code-op">=</span> <span class="code-kw">self</span>.cfg.reward_action_penalty <span class="code-op">*</span> (
+        <span class="code-op">-</span>torch.<span class="code-fn">sum</span>(<span class="code-kw">self</span>._actions <span class="code-op">**</span> <span class="code-num">2</span>, dim<span class="code-op">=-</span><span class="code-num">1</span>)
     )
 
     <span class="code-kw">return</span> r_dist <span class="code-op">+</span> r_tanh <span class="code-op">+</span> r_action</code></pre>
@@ -1870,7 +1918,7 @@ pip install <span class="code-op">-e</span> .</code></pre></div>
         <text x="300" y="127" text-anchor="middle" font-size="11" fill="#64748b">obs / reward / done / reset</text>
         <rect x="100" y="160" width="400" height="55" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5"/>
         <text x="300" y="185" text-anchor="middle" font-weight="700" font-size="14" fill="#059669">Isaac Lab (Articulation + Sensors)</text>
-        <text x="300" y="202" text-anchor="middle" font-size="11" fill="#64748b">FrameTransformer / DifferentialIK</text>
+        <text x="300" y="202" text-anchor="middle" font-size="11" fill="#64748b">Articulation + FrameTransformer</text>
         <rect x="100" y="235" width="400" height="55" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
         <text x="300" y="260" text-anchor="middle" font-weight="700" font-size="14" fill="#1d4ed8">Isaac Sim / PhysX</text>
         <text x="300" y="277" text-anchor="middle" font-size="11" fill="#64748b">GPU-accelerated physics engine</text>
@@ -1934,6 +1982,15 @@ pip install <span class="code-op">-e</span> .</code></pre></div>
         <tr><td><span class="tag tag-blue">quit</span></td><td>Exit</td><td><code>quit</code></td></tr>
       </tbody>
     </table></div>
+    <div class="info-box info-box-tip">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div><strong>First Steps:</strong>
+      1. After launching, type <code>info</code> to see the current state<br>
+      2. Type <code>home</code> to return to home position<br>
+      3. Try changing just one joint: <code>-1.0 -0.658 1.602 -2.585 -1.606 -1.641</code> (only J1 changed)<br>
+      4. Type <code>info</code> to see how the EE position changed<br>
+      5. Try IK control: <code>ee 0.5 0.0 1.3</code></div>
+    </div>
   </div>
 </section>
 
@@ -1989,8 +2046,26 @@ pip install <span class="code-op">-e</span> .</code></pre></div>
       <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       <div><strong>Try it:</strong> Compare <code>ee X Y Z</code> with manual joint input for the same target. IK computes the answer instantly, while manual input requires trial and error. This gap is exactly what RL aims to solve.</div>
     </div>
+    <div class="info-box info-box-warn">
+      <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div><strong>Coordinate System:</strong>
+      The <code>ee X Y Z</code> command uses world coordinates.
+      The robot base is at z=1.05m (table height), so z=1.05 is roughly the table surface.
+      Example: <code>ee 0.5 0.0 1.3</code> &rarr; about 25cm above the table.</div>
+    </div>
   </div>
 </section>
+
+<div class="info-box info-box-note" style="max-width:48rem;margin:var(--space-8) auto;">
+  <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+  <div><strong>Why Reinforcement Learning?</strong>
+  IK works well in known environments, but has limitations:<br>
+  - Path planning with obstacles<br>
+  - Adapting to disturbances and model errors<br>
+  - Complex objectives (orientation, force control)<br>
+  - Handling unknown dynamics<br>
+  RL solves these by learning from trial and error.</div>
+</div>
 
 <!-- Part 2 Divider -->
 <div class="part-divider" style="background:linear-gradient(135deg,var(--color-accent-dark),#2563eb);padding:var(--space-12) var(--space-6);text-align:center;color:white;">
@@ -2015,6 +2090,13 @@ pip install <span class="code-op">-e</span> .</code></pre></div>
         <tr><td><span class="tag tag-green">12-14</span></td><td>Target position</td><td>3</td><td>Target XYZ in robot base frame (m)</td></tr>
       </tbody>
     </table></div>
+    <h3 style="font-size:var(--text-lg);font-weight:600;margin:var(--space-8) 0 var(--space-4);">Action Application</h3>
+    <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Python &mdash; _apply_action()</span></div>
+    <pre><code><span class="code-kw">def</span> <span class="code-fn">_apply_action</span>(<span class="code-kw">self</span>):
+    current_pos <span class="code-op">=</span> <span class="code-kw">self</span>._robot.data.joint_pos[:, <span class="code-kw">self</span>._arm_joint_ids]
+    <span class="code-kw">self</span>._dof_targets <span class="code-op">=</span> current_pos <span class="code-op">+</span> <span class="code-kw">self</span>._actions <span class="code-op">*</span> <span class="code-kw">self</span>.cfg.action_scale
+    <span class="code-kw">self</span>._dof_targets <span class="code-op">=</span> torch.<span class="code-fn">clamp</span>(<span class="code-kw">self</span>._dof_targets, <span class="code-kw">self</span>._joint_lower, <span class="code-kw">self</span>._joint_upper)
+    <span class="code-kw">self</span>._robot.<span class="code-fn">set_joint_position_target</span>(<span class="code-kw">self</span>._dof_targets, joint_ids<span class="code-op">=</span><span class="code-kw">self</span>._arm_joint_ids)</code></pre></div>
     <h3 style="font-size:var(--text-lg);font-weight:600;margin:var(--space-8) 0 var(--space-4);">Reward Function</h3>
     <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Python &mdash; Reward</span></div>
     <pre><code><span class="code-cm"># 1. Linear distance penalty (farther = more negative)</span>
@@ -2038,6 +2120,7 @@ reward <span class="code-op">=</span> r_dist <span class="code-op">+</span> r_ta
       <h2 class="section-title" id="training-en-title">PPO Training</h2>
       <p class="section-desc">Train the robot with Proximal Policy Optimization.</p>
     </div>
+    <p style="color:var(--color-text-secondary);line-height:1.8;margin-bottom:var(--space-6);">PPO (Proximal Policy Optimization) is a policy gradient algorithm that updates the policy by limiting the size of each update step. This prevents catastrophic performance drops during training.</p>
     <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Terminal</span></div>
     <pre><code><span class="code-cm"># 64 parallel envs (recommended)</span>
 python scripts/train_ppo.py <span class="code-op">--task</span> Isaac-UR5-Reach-v0 <span class="code-op">--num_envs</span> <span class="code-num">64</span>
@@ -2135,14 +2218,14 @@ function toggleLang() {
     btn.textContent = '日本語';
     document.documentElement.lang = 'en';
     currentLang = 'en';
-    navLinks.innerHTML = '<li><a href="#overview-en">Overview</a></li><li><a href="#setup-en">Setup</a></li><li><a href="#architecture-en">Part 1: Control</a></li><li><a href="#ik-en">IK</a></li><li><a href="#env-interface-en">Part 2: RL</a></li><li><a href="#project-structure-en">Structure</a></li><li><a href="#advanced-en">Advanced</a></li>';
+    navLinks.innerHTML = '<li><a href="#overview-en">Overview</a></li><li><a href="#setup-en">Setup</a></li><li><a href="#robot-en">Robot</a></li><li><a href="#manual-en">Manual</a></li><li><a href="#ik-en">IK</a></li><li><a href="#env-interface-en">Environment</a></li><li><a href="#training-en">Training</a></li><li><a href="#advanced-en">Advanced</a></li>';
   } else {
     jaEl.style.display = '';
     enEl.style.display = 'none';
     btn.textContent = 'English';
     document.documentElement.lang = 'ja';
     currentLang = 'ja';
-    navLinks.innerHTML = '<li><a href="#overview">概要</a></li><li><a href="#setup">セットアップ</a></li><li><a href="#architecture">Part 1: 制御</a></li><li><a href="#ik">IK</a></li><li><a href="#env-interface">Part 2: RL</a></li><li><a href="#project-structure">構成</a></li><li><a href="#advanced">応用</a></li>';
+    navLinks.innerHTML = '<li><a href="#overview">概要</a></li><li><a href="#setup">セットアップ</a></li><li><a href="#robot">ロボット</a></li><li><a href="#manual">手動制御</a></li><li><a href="#ik">IK</a></li><li><a href="#env-interface">環境</a></li><li><a href="#training">訓練</a></li><li><a href="#advanced">応用</a></li>';
   }
   window.scrollTo(0, 0);
 }
