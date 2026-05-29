@@ -1169,8 +1169,8 @@ pip install <span class="code-op">-e</span> .</code></pre>
   <div class="container-narrow">
     <div class="section-header">
       <span class="section-label">Part 1 — Step 1</span>
-      <h2 class="section-title" id="manual-title">手動制御モード</h2>
-      <p class="section-desc">まず手動でロボットを動かし、関節空間の感覚を掴みましょう。</p>
+      <h2 class="section-title" id="manual-title">ロボット制御スクリプト</h2>
+      <p class="section-desc">Pythonの関数呼び出しでロボットを直接制御します。スクリプトを編集して実行しましょう。</p>
     </div>
 
     <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4);">起動方法</h3>
@@ -1179,48 +1179,61 @@ pip install <span class="code-op">-e</span> .</code></pre>
         <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
         <span class="code-lang">Terminal</span>
       </div>
-      <pre><code>python scripts/manual_joint_control.py <span class="code-op">--num_envs</span> <span class="code-num">1</span></code></pre>
+      <pre><code>python scripts/simple_demo.py</code></pre>
     </div>
 
-    <h3 style="font-size: var(--text-lg); font-weight: 600; margin: var(--space-8) 0 var(--space-4);">操作コマンド一覧</h3>
+    <h3 style="font-size: var(--text-lg); font-weight: 600; margin: var(--space-8) 0 var(--space-4);">Available Functions</h3>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>コマンド</th><th>説明</th><th>使用例</th></tr>
+          <tr><th>Function</th><th>Description</th><th>Example</th></tr>
         </thead>
         <tbody>
           <tr>
-            <td><span class="tag tag-blue">6つの数値</span></td>
-            <td>関節目標角度を設定 (ラジアン)</td>
-            <td><code>-0.5 -1.0 1.5 -2.0 -1.5 0.0</code></td>
+            <td><code>move_joints([j1,...,j6])</code></td>
+            <td>Move to target joint angles (rad)</td>
+            <td><code>move_joints([0.0, -1.57, 1.57, -1.57, -1.57, 0.0])</code></td>
           </tr>
           <tr>
-            <td><span class="tag tag-green">ee X Y Z</span></td>
-            <td>IKで末端をワールド位置へ移動</td>
-            <td><code>ee 0.5 0.0 1.2</code></td>
+            <td><code>move_to_ee([x, y, z])</code></td>
+            <td>Move EE to world position via IK (m)</td>
+            <td><code>move_to_ee([0.5, 0.0, 1.3])</code></td>
           </tr>
           <tr>
-            <td><span class="tag tag-green">home</span></td>
-            <td>ホームポジションに戻る</td>
-            <td><code>home</code></td>
+            <td><code>get_state()</code></td>
+            <td>Get current joint angles + EE position</td>
+            <td><code>print(get_state())</code></td>
           </tr>
           <tr>
-            <td><span class="tag tag-cyan">random</span></td>
-            <td>ランダムな動作を実行</td>
-            <td><code>random</code></td>
+            <td><code>home()</code></td>
+            <td>Return to home position</td>
+            <td><code>home()</code></td>
           </tr>
           <tr>
-            <td><span class="tag tag-cyan">info</span></td>
-            <td>現在の状態を表示</td>
-            <td><code>info</code></td>
-          </tr>
-          <tr>
-            <td><span class="tag tag-blue">quit</span></td>
-            <td>終了</td>
-            <td><code>quit</code></td>
+            <td><code>step(n)</code></td>
+            <td>Run n simulation steps (default 120 = 1s)</td>
+            <td><code>step(240)</code></td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="code-block" style="margin-top: var(--space-6);">
+      <div class="code-header">
+        <div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div>
+        <span class="code-lang">Python — scripts/simple_demo.py</span>
+      </div>
+      <pre><code><span class="code-cm"># Open scripts/simple_demo.py and edit the "YOUR CODE HERE" section:</span>
+
+<span class="code-cm"># Example: Move to 4 positions in a square</span>
+targets <span class="code-op">=</span> [
+    [<span class="code-num">0.5</span>, <span class="code-num">0.2</span>, <span class="code-num">1.3</span>],   <span class="code-cm"># right</span>
+    [<span class="code-num">0.5</span>, <span class="code-num">-0.2</span>, <span class="code-num">1.3</span>],  <span class="code-cm"># left</span>
+    [<span class="code-num">0.3</span>, <span class="code-num">0.0</span>, <span class="code-num">1.5</span>],   <span class="code-cm"># high</span>
+    [<span class="code-num">0.6</span>, <span class="code-num">0.0</span>, <span class="code-num">1.1</span>],   <span class="code-cm"># low</span>
+]
+<span class="code-kw">for</span> t <span class="code-kw">in</span> targets:
+    <span class="code-fn">move_to_ee</span>(t)</code></pre>
     </div>
 
     <div class="info-box info-box-tip" style="margin-top: var(--space-6);">
@@ -1228,11 +1241,11 @@ pip install <span class="code-op">-e</span> .</code></pre>
       <div>
         <strong>はじめてのステップ：</strong>
         <ol style="margin-top: var(--space-2); margin-left: var(--space-4); line-height: 2;">
-          <li>スクリプトを起動したら、まず <code>info</code> と入力して現在の状態を確認しましょう</li>
-          <li><code>home</code> と入力してホームポジションに戻します</li>
-          <li>1つの関節だけ変えてみましょう: <code>-1.0 -0.658 1.602 -2.585 -1.606 -1.641</code>（J1だけ変更）</li>
-          <li><code>info</code> で末端位置がどう変わったか確認します</li>
-          <li><code>ee 0.5 0.0 1.3</code> と入力してIK制御を試してみましょう</li>
+          <li><code>python scripts/simple_demo.py</code> を実行 → ロボットが自動でデモ動作</li>
+          <li><code>scripts/simple_demo.py</code> をエディタで開く</li>
+          <li>"YOUR CODE HERE" セクションを見つける</li>
+          <li><code>move_joints()</code> や <code>move_to_ee()</code> の引数を変えてみる</li>
+          <li>再実行して結果を確認</li>
         </ol>
       </div>
     </div>
@@ -1358,7 +1371,7 @@ dist    <span class="code-op">=</span> torch.<span class="code-fn">norm</span>(e
 
     <h3 style="font-size: var(--text-lg); font-weight: 600; margin: var(--space-8) 0 var(--space-4);">使い方</h3>
     <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-4);">
-      手動制御スクリプトで <code>ee</code> コマンドを使います：
+      <code>simple_demo.py</code> の <code>move_to_ee()</code> 関数を使います：
     </p>
 
     <div class="code-block">
@@ -1777,7 +1790,7 @@ python scripts/train_ppo.py \
 <span class="code-op">│       └──</span> ur5_moveit.usd      <span class="code-cm"># 3Dモデル</span>
 <span class="code-op">│</span>
 <span class="code-op">├──</span> <span class="code-fn">scripts/</span>
-<span class="code-op">│   ├──</span> <span class="code-str">manual_joint_control.py</span> <span class="code-cm"># 手動制御</span>
+<span class="code-op">│   ├──</span> <span class="code-str">simple_demo.py</span>          <span class="code-cm"># 直接制御デモ（関節 + IK）</span>
 <span class="code-op">│   └──</span> <span class="code-str">train_ppo.py</span>           <span class="code-cm"># RL学習</span>
 <span class="code-op">│</span>
 <span class="code-op">└──</span> <span class="code-fn">agents/</span>
@@ -1965,31 +1978,44 @@ pip install <span class="code-op">-e</span> .</code></pre></div>
   <div class="container-narrow">
     <div class="section-header">
       <span class="section-label">Part 1 &mdash; Step 1</span>
-      <h2 class="section-title" id="manual-en-title">Manual Control</h2>
-      <p class="section-desc">Move the robot by hand to build intuition for joint space.</p>
+      <h2 class="section-title" id="manual-en-title">Robot Control Script</h2>
+      <p class="section-desc">Control the robot directly with Python function calls. Edit the script and run it.</p>
     </div>
     <div class="code-block"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Terminal</span></div>
-    <pre><code>python scripts/manual_joint_control.py <span class="code-op">--num_envs</span> <span class="code-num">1</span></code></pre></div>
-    <h3 style="font-size:var(--text-lg);font-weight:600;margin:var(--space-8) 0 var(--space-4);">Available Commands</h3>
+    <pre><code>python scripts/simple_demo.py</code></pre></div>
+    <h3 style="font-size:var(--text-lg);font-weight:600;margin:var(--space-8) 0 var(--space-4);">Available Functions</h3>
     <div class="table-wrap"><table>
-      <thead><tr><th>Command</th><th>Description</th><th>Example</th></tr></thead>
+      <thead><tr><th>Function</th><th>Description</th><th>Example</th></tr></thead>
       <tbody>
-        <tr><td><span class="tag tag-blue">6 numbers</span></td><td>Set joint target angles (radians)</td><td><code>-0.5 -1.0 1.5 -2.0 -1.5 0.0</code></td></tr>
-        <tr><td><span class="tag tag-green">ee X Y Z</span></td><td>Move EE to world position via IK</td><td><code>ee 0.5 0.0 1.2</code></td></tr>
-        <tr><td><span class="tag tag-green">home</span></td><td>Return to home position</td><td><code>home</code></td></tr>
-        <tr><td><span class="tag tag-cyan">random</span></td><td>Execute random motion</td><td><code>random</code></td></tr>
-        <tr><td><span class="tag tag-cyan">info</span></td><td>Display current state</td><td><code>info</code></td></tr>
-        <tr><td><span class="tag tag-blue">quit</span></td><td>Exit</td><td><code>quit</code></td></tr>
+        <tr><td><code>move_joints([j1,...,j6])</code></td><td>Move to target joint angles (rad)</td><td><code>move_joints([0.0, -1.57, 1.57, -1.57, -1.57, 0.0])</code></td></tr>
+        <tr><td><code>move_to_ee([x, y, z])</code></td><td>Move EE to world position via IK (m)</td><td><code>move_to_ee([0.5, 0.0, 1.3])</code></td></tr>
+        <tr><td><code>get_state()</code></td><td>Get current joint angles + EE position</td><td><code>print(get_state())</code></td></tr>
+        <tr><td><code>home()</code></td><td>Return to home position</td><td><code>home()</code></td></tr>
+        <tr><td><code>step(n)</code></td><td>Run n simulation steps (default 120 = 1s)</td><td><code>step(240)</code></td></tr>
       </tbody>
     </table></div>
-    <div class="info-box info-box-tip">
+    <div class="code-block" style="margin-top:var(--space-6);"><div class="code-header"><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div><span class="code-lang">Python &mdash; scripts/simple_demo.py</span></div>
+    <pre><code><span class="code-cm"># Open scripts/simple_demo.py and edit the "YOUR CODE HERE" section:</span>
+
+<span class="code-cm"># Example: Move to 4 positions in a square</span>
+targets <span class="code-op">=</span> [
+    [<span class="code-num">0.5</span>, <span class="code-num">0.2</span>, <span class="code-num">1.3</span>],   <span class="code-cm"># right</span>
+    [<span class="code-num">0.5</span>, <span class="code-num">-0.2</span>, <span class="code-num">1.3</span>],  <span class="code-cm"># left</span>
+    [<span class="code-num">0.3</span>, <span class="code-num">0.0</span>, <span class="code-num">1.5</span>],   <span class="code-cm"># high</span>
+    [<span class="code-num">0.6</span>, <span class="code-num">0.0</span>, <span class="code-num">1.1</span>],   <span class="code-cm"># low</span>
+]
+<span class="code-kw">for</span> t <span class="code-kw">in</span> targets:
+    <span class="code-fn">move_to_ee</span>(t)</code></pre></div>
+    <div class="info-box info-box-tip" style="margin-top:var(--space-6);">
       <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       <div><strong>First Steps:</strong>
-      1. After launching, type <code>info</code> to see the current state<br>
-      2. Type <code>home</code> to return to home position<br>
-      3. Try changing just one joint: <code>-1.0 -0.658 1.602 -2.585 -1.606 -1.641</code> (only J1 changed)<br>
-      4. Type <code>info</code> to see how the EE position changed<br>
-      5. Try IK control: <code>ee 0.5 0.0 1.3</code></div>
+      <ol style="margin-top:var(--space-2);margin-left:var(--space-4);line-height:2;">
+        <li>Run <code>python scripts/simple_demo.py</code> &rarr; robot performs demo motions</li>
+        <li>Open <code>scripts/simple_demo.py</code> in your editor</li>
+        <li>Find the "YOUR CODE HERE" section</li>
+        <li>Change the arguments to <code>move_joints()</code> and <code>move_to_ee()</code></li>
+        <li>Re-run to see the results</li>
+      </ol></div>
     </div>
   </div>
 </section>
@@ -2182,7 +2208,7 @@ python scripts/train_ppo.py <span class="code-op">--task</span> Isaac-UR5-Reach-
 <span class="code-op">│       └──</span> ur5_moveit.usd      <span class="code-cm"># 3D model</span>
 <span class="code-op">│</span>
 <span class="code-op">├──</span> <span class="code-fn">scripts/</span>
-<span class="code-op">│   ├──</span> <span class="code-str">manual_joint_control.py</span> <span class="code-cm"># Manual control (joint + IK)</span>
+<span class="code-op">│   ├──</span> <span class="code-str">simple_demo.py</span>          <span class="code-cm"># Direct control demo (joint + IK)</span>
 <span class="code-op">│   └──</span> <span class="code-str">train_ppo.py</span>           <span class="code-cm"># RL training</span>
 <span class="code-op">│</span>
 <span class="code-op">└──</span> <span class="code-fn">agents/</span>

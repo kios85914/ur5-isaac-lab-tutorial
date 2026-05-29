@@ -46,22 +46,20 @@ python -c "import ur5_lab; print('OK')"
 
 ---
 
-## Quick Start: Manual Control
+## Quick Start: Robot Control
 
 ```bash
-python scripts/manual_joint_control.py --num_envs 1
+python scripts/simple_demo.py
 ```
 
-Available commands:
+Edit the `YOUR CODE HERE` section in `scripts/simple_demo.py` to control the robot:
 
-| Command | Description |
-|---------|-------------|
-| `6 numbers` | Set joint target angles (radians), e.g. `-0.5 -1.0 1.5 -2.0 -1.5 0.0` |
-| `ee X Y Z` | Move end-effector to world position via IK, e.g. `ee 0.5 0.0 1.2` |
-| `home` | Return to home position |
-| `random` | Execute random motion |
-| `info` | Show current joint angles, EE position, target position, distance |
-| `quit` | Exit |
+| Function | Description | Example |
+|----------|-------------|---------|
+| `move_joints([j1,...,j6])` | Move to target joint angles (rad) | `move_joints([0.0, -1.57, 1.57, -1.57, -1.57, 0.0])` |
+| `move_to_ee([x, y, z])` | Move EE to world position via IK | `move_to_ee([0.5, 0.0, 1.3])` |
+| `get_state()` | Get current joint angles + EE position | `print(get_state())` |
+| `home()` | Return to home position | `home()` |
 
 ---
 
@@ -110,7 +108,7 @@ ur5_teaching/
 │       └── ur5_moveit.usd          <- UR5 3D model
 │
 ├── scripts/
-│   ├── manual_joint_control.py     <- Manual control (joint + IK)
+│   ├── simple_demo.py              <- Direct control demo (joint + IK)
 │   └── train_ppo.py                <- PPO training
 │
 └── agents/
@@ -121,11 +119,11 @@ ur5_teaching/
 
 ## Learning Path
 
-### Step 1: Observe
-1. Run `manual_joint_control.py`, observe the robot in Isaac Sim
-2. Use `info` to check joint angles and EE position
-3. Try different joint angles, observe the robot's motion
-4. Use `ee X Y Z` to control via IK, compare with joint control
+### Step 1: Control the Robot
+1. Run `simple_demo.py`, watch the robot perform demo motions
+2. Open the script in your editor, find the `YOUR CODE HERE` section
+3. Change `move_joints()` arguments, re-run to see the difference
+4. Try `move_to_ee()` with different XYZ positions
 
 ### Step 2: Understand the Environment
 4. Read `ur5_reach_env.py`, understand observation/action/reward definitions

@@ -46,22 +46,20 @@ python -c "import ur5_lab; print('OK')"
 
 ---
 
-## クイックスタート：手動制御
+## クイックスタート：ロボット制御
 
 ```bash
-python scripts/manual_joint_control.py --num_envs 1
+python scripts/simple_demo.py
 ```
 
-使用可能なコマンド：
+`scripts/simple_demo.py` の `YOUR CODE HERE` セクションを編集してロボットを制御：
 
-| コマンド | 説明 |
-|----------|------|
-| `6つの数値` | 関節目標角度を設定（ラジアン）、例：`-0.5 -1.0 1.5 -2.0 -1.5 0.0` |
-| `ee X Y Z` | IK でエンドエフェクタをワールド位置へ移動、例：`ee 0.5 0.0 1.2` |
-| `home` | ホームポジションに戻る |
-| `random` | ランダムな動作を実行 |
-| `info` | 現在の関節角度、エンドエフェクタ位置、目標位置、距離を表示 |
-| `quit` | 終了 |
+| 関数 | 説明 | 例 |
+|------|------|-----|
+| `move_joints([j1,...,j6])` | 目標関節角度に移動 (rad) | `move_joints([0.0, -1.57, 1.57, -1.57, -1.57, 0.0])` |
+| `move_to_ee([x, y, z])` | IK でエンドエフェクタをワールド位置へ移動 | `move_to_ee([0.5, 0.0, 1.3])` |
+| `get_state()` | 現在の関節角度 + EE 位置を取得 | `print(get_state())` |
+| `home()` | ホームポジションに戻る | `home()` |
 
 ---
 
@@ -110,7 +108,7 @@ ur5_teaching/
 │       └── ur5_moveit.usd          ← UR5 3D モデル
 │
 ├── scripts/
-│   ├── manual_joint_control.py     ← 手動制御（関節 + IK）
+│   ├── simple_demo.py              ← 直接制御デモ（関節 + IK）
 │   └── train_ppo.py                ← PPO 訓練スクリプト
 │
 └── agents/
@@ -121,11 +119,11 @@ ur5_teaching/
 
 ## 学習ロードマップ
 
-### ステップ 1：観察
-1. `manual_joint_control.py` を実行し、Isaac Sim でロボットを観察する
-2. `info` コマンドで関節角度とエンドエフェクタ位置を確認する
-3. 異なる関節角度を入力し、ロボットの動きを観察する
-4. `ee X Y Z` で IK 制御を試し、関節制御との違いを比較する
+### ステップ 1：ロボットを制御する
+1. `simple_demo.py` を実行し、ロボットがデモ動作を行うのを観察する
+2. エディタでスクリプトを開き、`YOUR CODE HERE` セクションを見つける
+3. `move_joints()` の引数を変更し、再実行して違いを観察する
+4. `move_to_ee()` で異なる XYZ 座標を試す
 
 ### ステップ 2：環境の理解
 5. `ur5_reach_env.py` を読み、観測/行動/報酬の定義を理解する

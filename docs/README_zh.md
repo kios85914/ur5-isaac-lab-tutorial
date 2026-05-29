@@ -46,22 +46,20 @@ python -c "import ur5_lab; print('OK')"
 
 ---
 
-## 快速開始：手動控制
+## 快速開始：機器人控制
 
 ```bash
-python scripts/manual_joint_control.py --num_envs 1
+python scripts/simple_demo.py
 ```
 
-啟動後可以輸入以下指令：
+編輯 `scripts/simple_demo.py` 的 `YOUR CODE HERE` 區域來控制機器人：
 
-| 指令 | 說明 |
-|------|------|
-| `6個數字` | 設定關節目標角度（弧度），例如 `-0.5 -1.0 1.5 -2.0 -1.5 0.0` |
-| `ee X Y Z` | 用 IK 移動末端到世界座標位置，例如 `ee 0.5 0.0 1.2` |
-| `home` | 回到家位置 |
-| `random` | 隨機動作 |
-| `info` | 顯示當前關節角度、末端位置、目標位置、距離 |
-| `quit` | 離開 |
+| 函數 | 說明 | 範例 |
+|------|------|------|
+| `move_joints([j1,...,j6])` | 移動到目標關節角度 (rad) | `move_joints([0.0, -1.57, 1.57, -1.57, -1.57, 0.0])` |
+| `move_to_ee([x, y, z])` | 用 IK 移動末端到世界座標位置 | `move_to_ee([0.5, 0.0, 1.3])` |
+| `get_state()` | 取得當前關節角度 + 末端位置 | `print(get_state())` |
+| `home()` | 回到家位置 | `home()` |
 
 ---
 
@@ -110,7 +108,7 @@ ur5_teaching/
 │       └── ur5_moveit.usd          ← UR5 3D 模型
 │
 ├── scripts/
-│   ├── manual_joint_control.py     ← 手動控制（關節 + IK）
+│   ├── simple_demo.py              ← 直接控制示範（關節 + IK）
 │   └── train_ppo.py                ← PPO 訓練腳本
 │
 └── agents/
@@ -121,11 +119,11 @@ ur5_teaching/
 
 ## 學習路線
 
-### 第一步：觀察
-1. 執行 `manual_joint_control.py`，在 Isaac Sim 中觀察機器人
-2. 用 `info` 指令查看關節角度和末端位置
-3. 試著輸入不同的關節角度，觀察機器人的動作
-4. 用 `ee X Y Z` 進行 IK 控制，比較與關節控制的差異
+### 第一步：控制機器人
+1. 執行 `simple_demo.py`，觀察機器人自動執行示範動作
+2. 用編輯器打開腳本，找到 `YOUR CODE HERE` 區域
+3. 修改 `move_joints()` 的參數，重新執行觀察差異
+4. 試試 `move_to_ee()` 搭配不同的 XYZ 座標
 
 ### 第二步：理解環境
 5. 閱讀 `ur5_reach_env.py`，理解觀測/動作/獎勵的定義
